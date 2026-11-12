@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ApplicationErrors } from '../common/errors/application-error';
 import { MatchDto } from './dto/match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { Match } from './entities/match.entity';
@@ -28,14 +29,18 @@ export class MatchesService {
    *
    * @param dto - Required match data.
    * @returns The created match.
-   * @throws BadRequestException When a required field is missing or blank.
+   * @throws ApplicationError When a required field is missing or blank.
    */
   async create(dto: MatchDto): Promise<MatchResponseDto> {
     if (!dto.duration?.trim() || !dto.state?.trim()) {
-      throw new BadRequestException('duration and state are required for create');
+      throw ApplicationErrors.invalidInput(
+        'duration and state are required for create',
+      );
     }
 
-    const saved = await this.matchRepository.save(this.matchMapper.toEntity(dto));
+    const saved = await this.matchRepository.save(
+      this.matchMapper.toEntity(dto),
+    );
     return this.matchMapper.toResponseDto(saved);
   }
 
@@ -54,12 +59,14 @@ export class MatchesService {
    *
    * @param id - Match identifier.
    * @returns The matching match.
-   * @throws NotFoundException When the match does not exist.
+   * @throws ApplicationError When the match does not exist.
    */
   async findOne(id: number): Promise<MatchResponseDto> {
-    const match = await this.matchRepository.findOne({ where: { matchId: id } });
+    const match = await this.matchRepository.findOne({
+      where: { matchId: id },
+    });
     if (!match) {
-      throw new NotFoundException(`Match with id ${id} not found`);
+      throw ApplicationErrors.notFound(`Match with id ${id} not found`);
     }
     return this.matchMapper.toResponseDto(match);
   }
@@ -70,12 +77,14 @@ export class MatchesService {
    * @param id - Match identifier.
    * @param dto - Fields to update.
    * @returns The updated match.
-   * @throws NotFoundException When the match does not exist.
+   * @throws ApplicationError When the match does not exist.
    */
   async update(id: number, dto: MatchDto): Promise<MatchResponseDto> {
-    const match = await this.matchRepository.findOne({ where: { matchId: id } });
+    const match = await this.matchRepository.findOne({
+      where: { matchId: id },
+    });
     if (!match) {
-      throw new NotFoundException(`Match with id ${id} not found`);
+      throw ApplicationErrors.notFound(`Match with id ${id} not found`);
     }
 
     const saved = await this.matchRepository.save(

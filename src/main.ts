@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ApplicationExceptionFilter } from './common/filters/application-exception.filter';
 
 /**
  * Starts the application and enables request validation.
@@ -9,6 +10,7 @@ import { AppModule } from './app.module';
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new ApplicationExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
