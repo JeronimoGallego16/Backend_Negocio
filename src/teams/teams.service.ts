@@ -108,4 +108,26 @@ export class TeamsService {
     const saved = await this.teamRepository.save(merged);
     return this.teamMapper.toResponseDto(saved);
   }
+
+  /**
+   * Deletes a team only when no match refers to it.
+   *
+   * @param id - Team identifier.
+   * @returns A confirmation message after deleting the team.
+   * @throws ApplicationError When the team does not exist or participates in a match.
+   */
+  async remove(id: number): Promise<{ message: string }> {
+    const team = await this.teamRepository.findOne({ where: { teamId: id } });
+    if (!team) {
+      throw ApplicationErrors.notFound(`Team with id ${id} not found`);
+    }
+    if (await this.teamsRepository.hasMatches(id)) {
+      throw ApplicationErrors.conflict(
+        `Team with id ${id} cannot be deleted while it participates in matches`,
+      );
+    }
+
+    await this.teamRepository.remove(team);
+    return { message: `Team #${id} deleted successfully` };
+  }
 }

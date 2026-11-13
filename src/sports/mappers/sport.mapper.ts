@@ -15,7 +15,10 @@ export class SportMapper {
    * @returns The populated sport entity.
    */
   toEntity(dto: SportDto): Sport {
-    return Object.assign(new Sport(), dto);
+    return Object.assign(new Sport(), {
+      name: dto.name,
+      description: dto.description,
+    });
   }
 
   /**
@@ -42,6 +45,7 @@ export class SportMapper {
       sportId: entity.sportId,
       name: entity.name,
       description: entity.description,
+      parentSportId: entity.parentSport?.sportId ?? null,
     };
   }
 

@@ -5,4 +5,5 @@ export class SportResponseDto {
   sportId!: number;
   name!: string;
   description!: string;
+  parentSportId!: number | null;
 }

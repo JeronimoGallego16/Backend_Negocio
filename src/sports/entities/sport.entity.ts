@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
 /**
  * Database entity representing a sport.
@@ -14,4 +22,15 @@ export class Sport {
 
   @Column({ name: 'description', type: 'text' })
   description!: string;
+
+  @ManyToOne(() => Sport, (sport) => sport.subcategories, {
+    cascade: false,
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'parent_id', referencedColumnName: 'sportId' })
+  parentSport?: Sport | null;
+
+  @OneToMany(() => Sport, (sport) => sport.parentSport, { cascade: false })
+  subcategories?: Sport[];
 }

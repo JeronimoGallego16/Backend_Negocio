@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 /**
- * Creates the matches table without relations to other domains.
+ * Creates the matches table and its two team references.
  */
 export class CreateMatches20261110150200 implements MigrationInterface {
   name = 'CreateMatches20261110150200';
@@ -26,6 +26,26 @@ export class CreateMatches20261110150200 implements MigrationInterface {
           },
           { name: 'duration', type: 'varchar', length: '50', isNullable: false },
           { name: 'state', type: 'varchar', length: '50', isNullable: false },
+          { name: 'home_team_id', type: 'int', isNullable: false },
+          { name: 'away_team_id', type: 'int', isNullable: false },
+        ],
+        foreignKeys: [
+          {
+            name: 'fk_matches_home_team',
+            columnNames: ['home_team_id'],
+            referencedTableName: 'teams',
+            referencedColumnNames: ['team_id'],
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION',
+          },
+          {
+            name: 'fk_matches_away_team',
+            columnNames: ['away_team_id'],
+            referencedTableName: 'teams',
+            referencedColumnNames: ['team_id'],
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION',
+          },
         ],
       }),
     );
