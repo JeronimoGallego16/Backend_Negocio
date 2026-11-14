@@ -6,6 +6,7 @@ import {
   Unique,
 } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
+import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 /**
  * Database entity representing a tournament team.
@@ -27,4 +28,9 @@ export class Team {
 
   @OneToMany(() => Match, (match) => match.awayTeam, { cascade: false })
   awayMatches?: Match[];
+
+  @OneToMany(() => TeamSport, (teamSport) => teamSport.team, {
+    cascade: false,
+  })
+  teamSports?: TeamSport[];
 }

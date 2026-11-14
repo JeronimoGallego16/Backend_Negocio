@@ -59,7 +59,9 @@ export class TeamsService {
    * @returns All teams.
    */
   async findAll(): Promise<TeamResponseDto[]> {
-    const teams = await this.teamRepository.find();
+    const teams = await this.teamRepository.find({
+      relations: { teamSports: { sport: true } },
+    });
     return this.teamMapper.toResponseDtoList(teams);
   }
 
@@ -71,7 +73,10 @@ export class TeamsService {
    * @throws ApplicationError When the team does not exist.
    */
   async findOne(id: number): Promise<TeamResponseDto> {
-    const team = await this.teamRepository.findOne({ where: { teamId: id } });
+    const team = await this.teamRepository.findOne({
+      where: { teamId: id },
+      relations: { teamSports: { sport: true } },
+    });
     if (!team) {
       throw ApplicationErrors.notFound(`Team with id ${id} not found`);
     }
@@ -87,7 +92,10 @@ export class TeamsService {
    * @throws ApplicationError When the team does not exist or the new name and category belong to another team.
    */
   async update(id: number, dto: TeamDto): Promise<TeamResponseDto> {
-    const team = await this.teamRepository.findOne({ where: { teamId: id } });
+    const team = await this.teamRepository.findOne({
+      where: { teamId: id },
+      relations: { teamSports: { sport: true } },
+    });
     if (!team) {
       throw ApplicationErrors.notFound(`Team with id ${id} not found`);
     }
