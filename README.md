@@ -31,6 +31,15 @@
 $ npm install
 ```
 
+## Frontend access
+
+The API allows requests from `http://localhost:4200` by default. Set
+`FRONTEND_ORIGIN` to the frontend's origin when using a different host or port.
+Protected endpoints require a valid token authorized by the security service.
+Clients can send it as `Authorization: Bearer <token>` or use the security
+service's HttpOnly session cookie. Cookie-based requests require credentialed
+requests to be enabled in the frontend and backend.
+
 ## Compile and run the project
 
 ```bash

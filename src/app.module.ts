@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { SecurityGuard } from './common/guards/security.guard';
 import { MatchesModule } from './matches/matches.module';
 import { SportsModule } from './sports/sports.module';
 import { TeamsModule } from './teams/teams.module';
@@ -25,6 +29,14 @@ import { TeamsModule } from './teams/teams.module';
     TeamsModule,
     SportsModule,
     MatchesModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: SecurityGuard,
+    },
   ],
 })
 export class AppModule {}
