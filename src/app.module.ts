@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SecurityGuard } from './common/guards/security.guard';
 import { MatchesModule } from './matches/matches.module';
+import { PlayersModule } from './players/players.module';
 import { SportsModule } from './sports/sports.module';
 import { TeamsModule } from './teams/teams.module';
 
@@ -29,6 +30,7 @@ import { TeamsModule } from './teams/teams.module';
     TeamsModule,
     SportsModule,
     MatchesModule,
+    PlayersModule,
   ],
   controllers: [AppController],
   providers: [
