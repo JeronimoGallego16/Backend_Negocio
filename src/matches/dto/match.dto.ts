@@ -7,7 +7,7 @@ export class MatchDto {
   @ValidateIf((_object, value: unknown) => value !== undefined)
   @IsString()
   @Matches(/\S/)
-  @MaxLength(50)
+  @MaxLength(50) 
   duration?: string;
 
   @ValidateIf((_object, value: unknown) => value !== undefined)

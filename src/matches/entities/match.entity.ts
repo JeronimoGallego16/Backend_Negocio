@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { Anotacion } from './anotacion.entity';
+import { Annotation } from '../../annotations/entities/annotation.entity';
 
 /**
  * Database entity representing a match.
@@ -16,6 +16,6 @@ export class Match {
   @Column({ name: 'state', type: 'varchar', length: 50 })
   state!: string;
 
-  @OneToMany(() => Anotacion, (anotacion) => anotacion.partido)
-  anotaciones!: Relation<Anotacion[]>;
+  @OneToMany(() => Annotation, (annotation) => annotation.match)
+  annotations!: Relation<Annotation[]>;
 }

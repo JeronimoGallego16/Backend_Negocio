@@ -5,14 +5,19 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SecurityGuard } from './common/guards/security.guard';
-import { Anotacion } from './matches/entities/anotacion.entity';
+import { AnnotationsModule } from './annotations/annotations.module';
+import { Annotation } from './annotations/entities/annotation.entity';
 import { Match } from './matches/entities/match.entity';
 import { MatchesModule } from './matches/matches.module';
 import { PlayersModule } from './players/players.module';
-import { EquipoJugador } from './players/entities/equipo-jugador.entity';
-import { HabilidadJugador } from './players/entities/habilidad-jugador.entity';
-import { Habilidad } from './players/entities/habilidad.entity';
-import { Jugador } from './players/entities/jugador.entity';
+import { PlayerProfileModule } from './players/player-profile.module';
+import { PlayerTeam } from './player-teams/entities/player-team.entity';
+import { PlayerSkill } from './player-skills/entities/player-skill.entity';
+import { Skill } from './skills/entities/skill.entity';
+import { Player } from './players/entities/player.entity';
+import { PlayerSkillsModule } from './player-skills/player-skills.module';
+import { PlayerTeamsModule } from './player-teams/player-teams.module';
+import { SkillsModule } from './skills/skills.module';
 import { SportsModule } from './sports/sports.module';
 import { Sport } from './sports/entities/sport.entity';
 import { TeamsModule } from './teams/teams.module';
@@ -35,11 +40,11 @@ import { Team } from './teams/entities/team.entity';
           Team,
           Sport,
           Match,
-          Anotacion,
-          Jugador,
-          Habilidad,
-          HabilidadJugador,
-          EquipoJugador,
+          Annotation,
+          Player,
+          Skill,
+          PlayerSkill,
+          PlayerTeam,
         ],
         synchronize: false,
       }),
@@ -48,6 +53,11 @@ import { Team } from './teams/entities/team.entity';
     SportsModule,
     MatchesModule,
     PlayersModule,
+    SkillsModule,
+    PlayerSkillsModule,
+    PlayerTeamsModule,
+    PlayerProfileModule,
+    AnnotationsModule,
   ],
   controllers: [AppController],
   providers: [
