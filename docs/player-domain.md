@@ -35,11 +35,10 @@ All routes remain protected by the application's global security guard.
 
 ## Database migration
 
-The original player-domain migration is retained to preserve migration history.
-The follow-up migration `TranslatePlayerDomainColumns20261117120000` renames
-Spanish database columns and gender values to English while retaining existing
-records. Run pending migrations only after configuring the MySQL connection in
-`.env`:
+The initial player-domain migration creates all player-domain tables and
+columns in English. This project has `synchronize: false`; starting the server
+does not create tables automatically. After creating the empty database and
+configuring its connection in `.env`, apply the migrations:
 
 ```bash
 npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts

@@ -6,88 +6,88 @@ export class CreatePlayerDomain20261116120000 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE players (
-        id_jugador INT NOT NULL AUTO_INCREMENT,
-        nombre VARCHAR(100) NOT NULL,
-        apellido VARCHAR(100) NOT NULL,
-        fecha_nacimiento DATE NOT NULL,
-        genero ENUM(
-          'MASCULINO',
-          'FEMENINO',
-          'OTRO',
-          'PREFIERO_NO_DECIR'
+        player_id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        birth_date DATE NOT NULL,
+        gender ENUM(
+          'MALE',
+          'FEMALE',
+          'OTHER',
+          'PREFER_NOT_TO_SAY'
         ) NOT NULL,
-        correo VARCHAR(150) NOT NULL,
-        identificacion VARCHAR(30) NOT NULL,
-        activo TINYINT(1) NOT NULL DEFAULT 1,
-        PRIMARY KEY (id_jugador),
-        UNIQUE KEY uq_players_correo (correo),
-        UNIQUE KEY uq_players_identificacion (identificacion)
+        email VARCHAR(150) NOT NULL,
+        identification VARCHAR(30) NOT NULL,
+        active TINYINT(1) NOT NULL DEFAULT 1,
+        PRIMARY KEY (player_id),
+        UNIQUE KEY uq_players_email (email),
+        UNIQUE KEY uq_players_identification (identification)
       ) ENGINE=InnoDB
     `);
 
     await queryRunner.query(`
       CREATE TABLE skills (
-        id_habilidad INT NOT NULL AUTO_INCREMENT,
-        nombre VARCHAR(100) NOT NULL,
-        descripcion VARCHAR(255) NULL,
-        PRIMARY KEY (id_habilidad),
-        UNIQUE KEY uq_skills_nombre (nombre)
+        skill_id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        description VARCHAR(255) NULL,
+        PRIMARY KEY (skill_id),
+        UNIQUE KEY uq_skills_name (name)
       ) ENGINE=InnoDB
     `);
 
     await queryRunner.query(`
       CREATE TABLE player_skills (
-        id_habilidad_jugador INT NOT NULL AUTO_INCREMENT,
-        nivel TINYINT UNSIGNED NOT NULL,
-        observaciones VARCHAR(500) NULL,
-        id_jugador INT NOT NULL,
-        id_habilidad INT NOT NULL,
-        PRIMARY KEY (id_habilidad_jugador),
-        UNIQUE KEY uq_player_skills_player_skill (id_jugador, id_habilidad),
-        CONSTRAINT chk_player_skills_nivel CHECK (nivel BETWEEN 1 AND 5),
-        CONSTRAINT fk_player_skills_jugador FOREIGN KEY (id_jugador)
-          REFERENCES players (id_jugador) ON DELETE RESTRICT,
-        CONSTRAINT fk_player_skills_habilidad FOREIGN KEY (id_habilidad)
-          REFERENCES skills (id_habilidad) ON DELETE RESTRICT
+        player_skill_id INT NOT NULL AUTO_INCREMENT,
+        level TINYINT UNSIGNED NOT NULL,
+        observations VARCHAR(500) NULL,
+        player_id INT NOT NULL,
+        skill_id INT NOT NULL,
+        PRIMARY KEY (player_skill_id),
+        UNIQUE KEY uq_player_skills_player_skill (player_id, skill_id),
+        CONSTRAINT chk_player_skills_level CHECK (level BETWEEN 1 AND 5),
+        CONSTRAINT fk_player_skills_player FOREIGN KEY (player_id)
+          REFERENCES players (player_id) ON DELETE RESTRICT,
+        CONSTRAINT fk_player_skills_skill FOREIGN KEY (skill_id)
+          REFERENCES skills (skill_id) ON DELETE RESTRICT
       ) ENGINE=InnoDB
     `);
 
     await queryRunner.query(`
       CREATE TABLE player_teams (
-        id_historial INT NOT NULL AUTO_INCREMENT,
-        fecha_inicio DATE NOT NULL,
-        fecha_fin DATE NULL,
-        id_jugador INT NOT NULL,
-        id_equipo INT NOT NULL,
-        jugador_vigente_id INT
+        player_team_id INT NOT NULL AUTO_INCREMENT,
+        start_date DATE NOT NULL,
+        end_date DATE NULL,
+        player_id INT NOT NULL,
+        team_id INT NOT NULL,
+        active_player_id INT
           GENERATED ALWAYS AS (
-            CASE WHEN fecha_fin IS NULL THEN id_jugador ELSE NULL END
+            CASE WHEN end_date IS NULL THEN player_id ELSE NULL END
           ) VIRTUAL,
-        PRIMARY KEY (id_historial),
-        UNIQUE KEY uq_player_teams_period (id_jugador, id_equipo, fecha_inicio),
-        UNIQUE KEY uq_player_teams_one_active (jugador_vigente_id),
-        CONSTRAINT fk_player_teams_jugador FOREIGN KEY (id_jugador)
-          REFERENCES players (id_jugador) ON DELETE RESTRICT,
-        CONSTRAINT fk_player_teams_equipo FOREIGN KEY (id_equipo)
+        PRIMARY KEY (player_team_id),
+        UNIQUE KEY uq_player_teams_period (player_id, team_id, start_date),
+        UNIQUE KEY uq_player_teams_one_active (active_player_id),
+        CONSTRAINT fk_player_teams_player FOREIGN KEY (player_id)
+          REFERENCES players (player_id) ON DELETE RESTRICT,
+        CONSTRAINT fk_player_teams_team FOREIGN KEY (team_id)
           REFERENCES teams (team_id) ON DELETE RESTRICT
       ) ENGINE=InnoDB
     `);
 
     await queryRunner.query(`
       CREATE TABLE annotations (
-        id_anotacion INT NOT NULL AUTO_INCREMENT,
-        id_partido INT NOT NULL,
-        minuto SMALLINT UNSIGNED NOT NULL,
-        tipo VARCHAR(30) NOT NULL,
-        anulado TINYINT(1) NOT NULL DEFAULT 0,
-        id_jugador INT NOT NULL,
-        PRIMARY KEY (id_anotacion),
-        KEY idx_annotations_partido (id_partido),
-        KEY idx_annotations_jugador (id_jugador),
-        CONSTRAINT fk_annotations_partido FOREIGN KEY (id_partido)
+        annotation_id INT NOT NULL AUTO_INCREMENT,
+        match_id INT NOT NULL,
+        minute SMALLINT UNSIGNED NOT NULL,
+        type VARCHAR(30) NOT NULL,
+        voided TINYINT(1) NOT NULL DEFAULT 0,
+        player_id INT NOT NULL,
+        PRIMARY KEY (annotation_id),
+        KEY idx_annotations_match (match_id),
+        KEY idx_annotations_player (player_id),
+        CONSTRAINT fk_annotations_match FOREIGN KEY (match_id)
           REFERENCES matches (match_id) ON DELETE RESTRICT,
-        CONSTRAINT fk_annotations_jugador FOREIGN KEY (id_jugador)
-          REFERENCES players (id_jugador) ON DELETE RESTRICT
+        CONSTRAINT fk_annotations_player FOREIGN KEY (player_id)
+          REFERENCES players (player_id) ON DELETE RESTRICT
       ) ENGINE=InnoDB
     `);
   }
