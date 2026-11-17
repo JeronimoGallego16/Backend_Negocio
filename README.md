@@ -404,3 +404,26 @@ Repositorios, DTOs, servicios, controladores y frontend siguen pendientes, tal c
 MIGRACIÓN BASE DE DATOS:
 1.iniciar la base de datos
 2. correr el comando: npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts
+
+
+### Resumen
+
+Se implementaron las capas de backend para **jugadores, habilidades, asignaciones de habilidades, historial jugador-equipo, perfil de jugador y anotaciones**: DTOs, mappers, repositories, services y endpoints. También se conectaron los módulos y se configuró Jest para las pruebas.
+
+### Cómo correrlo en otra máquina
+
+1. Obtener la versión actual del proyecto y ejecutar `npm install`.
+2. Crear una base de datos MySQL vacía y configurar en `.env` las variables `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS` y `DB_NAME`.
+3. Ejecutar todas las migraciones, en orden:
+   ```powershell
+   npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts
+   ```
+   Esto crea primero las tablas base y luego las del dominio nuevo. No deben ejecutar solo la última migración en una base vacía.
+4. Configurar `MS_SECURITY` para que las rutas protegidas funcionen y arrancar:
+   ```powershell
+   npm run start:dev
+   ```
+
+### Pendiente
+
+La validación de que el jugador que anota pertenece a un equipo participante del partido; `Match` todavía no tiene fecha ni equipos local/visitante. También quedan pendientes el frontend y las notificaciones. Las pruebas, compilación y lint pasaron en esta máquina.
