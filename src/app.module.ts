@@ -5,10 +5,18 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SecurityGuard } from './common/guards/security.guard';
+import { Anotacion } from './matches/entities/anotacion.entity';
+import { Match } from './matches/entities/match.entity';
 import { MatchesModule } from './matches/matches.module';
 import { PlayersModule } from './players/players.module';
+import { EquipoJugador } from './players/entities/equipo-jugador.entity';
+import { HabilidadJugador } from './players/entities/habilidad-jugador.entity';
+import { Habilidad } from './players/entities/habilidad.entity';
+import { Jugador } from './players/entities/jugador.entity';
 import { SportsModule } from './sports/sports.module';
+import { Sport } from './sports/entities/sport.entity';
 import { TeamsModule } from './teams/teams.module';
+import { Team } from './teams/entities/team.entity';
 
 @Module({
   imports: [
@@ -23,7 +31,16 @@ import { TeamsModule } from './teams/teams.module';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [
+          Team,
+          Sport,
+          Match,
+          Anotacion,
+          Jugador,
+          Habilidad,
+          HabilidadJugador,
+          EquipoJugador,
+        ],
         synchronize: false,
       }),
     }),

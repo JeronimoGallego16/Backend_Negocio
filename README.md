@@ -400,3 +400,7 @@ npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts
 ```
 
 Repositorios, DTOs, servicios, controladores y frontend siguen pendientes, tal como delimita el tutorial.
+
+MIGRACIÓN BASE DE DATOS:
+1.iniciar la base de datos
+2. correr el comando: npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts
