@@ -5,4 +5,5 @@ export class TeamResponseDto {
   teamId!: number;
   name!: string;
   category!: string;
+  sportId?: number;
 }

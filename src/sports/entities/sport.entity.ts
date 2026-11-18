@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Team } from '../../teams/entities/team.entity';
+import { Tournament } from '../../tournaments/entities/tournament.entity';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
 /**
  * Database entity representing a sport.
@@ -14,4 +22,12 @@ export class Sport {
 
   @Column({ name: 'description', type: 'text' })
   description!: string;
+
+  @OneToMany(() => Tournament, (tournament) => tournament.sport, {
+    cascade: false,
+  })
+  tournaments?: Tournament[];
+
+  @OneToMany(() => Team, (team) => team.sport, { cascade: false })
+  teams?: Team[];
 }
