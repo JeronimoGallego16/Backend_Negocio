@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Phase } from '../../phases/entities/phase.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 /**
  * Database entity representing a match.
@@ -13,4 +20,15 @@ export class Match {
 
   @Column({ name: 'state', type: 'varchar', length: 50 })
   state!: string;
+
+  @Column({ name: 'phase_id', type: 'int', nullable: true })
+  phaseId?: number;
+
+  @ManyToOne(() => Phase, {
+    cascade: false,
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'phase_id' })
+  phase?: Phase;
 }

@@ -1,4 +1,4 @@
-import { IsString, Matches, MaxLength, ValidateIf } from 'class-validator';
+import { IsInt, IsString, Matches, MaxLength, Min, ValidateIf } from 'class-validator';
 
 /**
  * Request data for creating or updating a match.
@@ -15,4 +15,9 @@ export class MatchDto {
   @Matches(/\S/)
   @MaxLength(50)
   state?: string;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(1)
+  phaseId?: number;
 }

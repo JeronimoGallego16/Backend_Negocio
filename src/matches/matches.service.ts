@@ -6,6 +6,7 @@ import { MatchDto } from './dto/match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { Match } from './entities/match.entity';
 import { MatchMapper } from './mappers/match.mapper';
+import { Phase } from '../phases/entities/phase.entity';
 
 /**
  * Business logic for managing matches.
@@ -21,6 +22,8 @@ export class MatchesService {
   constructor(
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
+    @InjectRepository(Phase)
+    private readonly phaseRepository: Repository<Phase>,
     private readonly matchMapper: MatchMapper,
   ) {}
 
@@ -38,6 +41,15 @@ export class MatchesService {
       );
     }
 
+    if (dto.phaseId !== undefined) {
+      const phase = await this.phaseRepository.findOne({
+        where: { phaseId: dto.phaseId },
+      });
+      if (!phase) {
+        throw ApplicationErrors.notFound(`Phase with id ${dto.phaseId} not found`);
+      }
+    }
+
     const saved = await this.matchRepository.save(
       this.matchMapper.toEntity(dto),
     );
@@ -50,7 +62,7 @@ export class MatchesService {
    * @returns All matches.
    */
   async findAll(): Promise<MatchResponseDto[]> {
-    const matches = await this.matchRepository.find();
+    const matches = await this.matchRepository.find({ relations: { phase: true } });
     return this.matchMapper.toResponseDtoList(matches);
   }
 
@@ -64,6 +76,7 @@ export class MatchesService {
   async findOne(id: number): Promise<MatchResponseDto> {
     const match = await this.matchRepository.findOne({
       where: { matchId: id },
+      relations: { phase: true },
     });
     if (!match) {
       throw ApplicationErrors.notFound(`Match with id ${id} not found`);
@@ -82,9 +95,19 @@ export class MatchesService {
   async update(id: number, dto: MatchDto): Promise<MatchResponseDto> {
     const match = await this.matchRepository.findOne({
       where: { matchId: id },
+      relations: { phase: true },
     });
     if (!match) {
       throw ApplicationErrors.notFound(`Match with id ${id} not found`);
+    }
+
+    if (dto.phaseId !== undefined) {
+      const phase = await this.phaseRepository.findOne({
+        where: { phaseId: dto.phaseId },
+      });
+      if (!phase) {
+        throw ApplicationErrors.notFound(`Phase with id ${dto.phaseId} not found`);
+      }
     }
 
     const saved = await this.matchRepository.save(

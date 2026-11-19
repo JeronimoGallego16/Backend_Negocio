@@ -1,4 +1,5 @@
 import { Registration } from '../../registrations/entities/registration.entity';
+import { Group } from '../../phases/entities/group.entity';
 import { Sport } from '../../sports/entities/sport.entity';
 import {
   Column,
@@ -36,4 +37,15 @@ export class Team {
     cascade: false,
   })
   registrations?: Registration[];
+
+  @Column({ name: 'group_id', type: 'int', nullable: true })
+  groupId?: number;
+
+  @ManyToOne(() => Group, (group) => group.teams, {
+    cascade: false,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'group_id' })
+  group?: Group;
 }

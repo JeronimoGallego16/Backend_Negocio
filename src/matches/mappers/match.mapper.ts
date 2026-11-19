@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MatchDto } from '../dto/match.dto';
 import { MatchResponseDto } from '../dto/match-response.dto';
 import { Match } from '../entities/match.entity';
+import { Phase } from '../../phases/entities/phase.entity';
 
 /**
  * Maps match request data to entities and entities to responses.
@@ -15,7 +16,11 @@ export class MatchMapper {
    * @returns The populated match entity.
    */
   toEntity(dto: MatchDto): Match {
-    return Object.assign(new Match(), dto);
+    const entity = Object.assign(new Match(), dto);
+    if (dto.phaseId !== undefined) {
+      entity.phase = { phaseId: dto.phaseId } as Phase;
+    }
+    return entity;
   }
 
   /**
@@ -28,6 +33,9 @@ export class MatchMapper {
   mergeEntity(entity: Match, dto: MatchDto): Match {
     if (dto.duration !== undefined) entity.duration = dto.duration;
     if (dto.state !== undefined) entity.state = dto.state;
+    if (dto.phaseId !== undefined) {
+      entity.phase = { phaseId: dto.phaseId } as Phase;
+    }
     return entity;
   }
 
@@ -42,6 +50,7 @@ export class MatchMapper {
       matchId: entity.matchId,
       duration: entity.duration,
       state: entity.state,
+      phaseId: entity.phase?.phaseId,
     };
   }
 

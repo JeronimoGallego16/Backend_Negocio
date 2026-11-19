@@ -47,4 +47,5 @@ export class Tournament {
     cascade: false,
   })
   registrations?: Registration[];
+
 }

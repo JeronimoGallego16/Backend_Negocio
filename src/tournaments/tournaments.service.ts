@@ -126,6 +126,9 @@ export class TournamentsService {
     if (await this.tournamentsRepository.hasRegistrations(id)) {
       throw ApplicationErrors.conflict('A tournament with registrations cannot be deleted');
     }
+    if (await this.tournamentsRepository.hasPhases(id)) {
+      throw ApplicationErrors.conflict('A tournament with phases cannot be deleted');
+    }
     await this.tournamentRepository.remove(tournament);
   }
 

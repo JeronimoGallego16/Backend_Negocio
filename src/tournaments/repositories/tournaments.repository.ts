@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Registration } from '../../registrations/entities/registration.entity';
 import { Tournament } from '../entities/tournament.entity';
+import { Phase } from '../../phases/entities/phase.entity';
 
 /**
  * Repository for tournament-specific queries.
@@ -20,6 +21,8 @@ export class TournamentsRepository {
     private readonly tournamentRepository: Repository<Tournament>,
     @InjectRepository(Registration)
     private readonly registrationRepository: Repository<Registration>,
+    @InjectRepository(Phase)
+    private readonly phaseRepository: Repository<Phase>,
   ) {}
 
   /**
@@ -32,6 +35,20 @@ export class TournamentsRepository {
     return (
       (await this.registrationRepository.count({
         where: { tournament: { tournamentId } },
+      })) > 0
+    );
+  }
+
+  /**
+   * Checks whether a tournament has phases.
+   *
+   * @param tournamentId - Tournament identifier.
+   * @returns Whether at least one phase exists.
+   */
+  async hasPhases(tournamentId: number): Promise<boolean> {
+    return (
+      (await this.phaseRepository.count({
+        where: { tournamentId },
       })) > 0
     );
   }
