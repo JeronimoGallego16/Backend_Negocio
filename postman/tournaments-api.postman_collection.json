@@ -1,0 +1,294 @@
+{
+  "info": {
+    "name": "Tournament Management API",
+    "description": "One request per API operation. Replace the numeric example IDs with IDs that exist in your database. Run the Remove requests after testing the related resources.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Team\",\n  \"category\": \"Open\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/teams"
+          }
+        },
+        {
+          "name": "findAll",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/teams"
+          }
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/teams/1"
+          }
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Updated Open\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/teams/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sports",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Sport\",\n  \"description\": \"Sport for API testing\",\n  \"parentSportId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/sports"
+          }
+        },
+        {
+          "name": "findAll",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/sports"
+          }
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/sports/1"
+          }
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated by Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/sports/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "TeamSports",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": 1,\n  \"sportId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/team-sports"
+          }
+        },
+        {
+          "name": "findAll",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/team-sports"
+          }
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/team-sports/1"
+          }
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sportId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/team-sports/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Matches",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"duration\": \"90 minutes\",\n  \"state\": \"Scheduled\",\n  \"homeTeamId\": 1,\n  \"awayTeamId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/matches"
+          }
+        },
+        {
+          "name": "findAll",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/matches"
+          }
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/matches/1"
+          }
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"In progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/matches/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Remove",
+      "item": [
+        {
+          "name": "TeamSports.remove",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/team-sports/1"
+          }
+        },
+        {
+          "name": "Matches.remove",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/matches/1"
+          }
+        },
+        {
+          "name": "Teams.remove",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/teams/1"
+          }
+        },
+        {
+          "name": "Sports.remove",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/sports/1"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Team } from '../../teams/entities/team.entity';
 
 /**
  * Database entity representing a match.
@@ -13,4 +20,20 @@ export class Match {
 
   @Column({ name: 'state', type: 'varchar', length: 50 })
   state!: string;
+
+  @ManyToOne(() => Team, (team) => team.homeMatches, {
+    cascade: false,
+    nullable: false,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'home_team_id', referencedColumnName: 'teamId' })
+  homeTeam!: Team;
+
+  @ManyToOne(() => Team, (team) => team.awayMatches, {
+    cascade: false,
+    nullable: false,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'away_team_id', referencedColumnName: 'teamId' })
+  awayTeam!: Team;
 }

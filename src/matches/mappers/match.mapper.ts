@@ -15,7 +15,10 @@ export class MatchMapper {
    * @returns The populated match entity.
    */
   toEntity(dto: MatchDto): Match {
-    return Object.assign(new Match(), dto);
+    return Object.assign(new Match(), {
+      duration: dto.duration,
+      state: dto.state,
+    });
   }
 
   /**
@@ -42,6 +45,8 @@ export class MatchMapper {
       matchId: entity.matchId,
       duration: entity.duration,
       state: entity.state,
+      homeTeamId: entity.homeTeam.teamId,
+      awayTeamId: entity.awayTeam.teamId,
     };
   }
 

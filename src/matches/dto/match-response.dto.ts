@@ -5,4 +5,6 @@ export class MatchResponseDto {
   matchId!: number;
   duration!: string;
   state!: string;
+  homeTeamId!: number;
+  awayTeamId!: number;
 }

@@ -45,9 +45,15 @@ export class SportsService {
       throw ApplicationErrors.conflict('A sport with this name already exists');
     }
 
-    const saved = await this.sportRepository.save(
-      this.sportMapper.toEntity(dto),
-    );
+    const sport = this.sportMapper.toEntity(dto);
+    if (dto.parentSportId !== undefined && dto.parentSportId !== null) {
+      sport.parentSport = await this.getValidParent(
+        dto.parentSportId,
+        undefined,
+      );
+    }
+
+    const saved = await this.sportRepository.save(sport);
     return this.sportMapper.toResponseDto(saved);
   }
 
@@ -57,7 +63,9 @@ export class SportsService {
    * @returns All sports.
    */
   async findAll(): Promise<SportResponseDto[]> {
-    const sports = await this.sportRepository.find();
+    const sports = await this.sportRepository.find({
+      relations: { parentSport: true, teamSports: { team: true } },
+    });
     return this.sportMapper.toResponseDtoList(sports);
   }
 
@@ -71,6 +79,7 @@ export class SportsService {
   async findOne(id: number): Promise<SportResponseDto> {
     const sport = await this.sportRepository.findOne({
       where: { sportId: id },
+      relations: { parentSport: true, teamSports: { team: true } },
     });
     if (!sport) {
       throw ApplicationErrors.notFound(`Sport with id ${id} not found`);
@@ -89,6 +98,7 @@ export class SportsService {
   async update(id: number, dto: SportDto): Promise<SportResponseDto> {
     const sport = await this.sportRepository.findOne({
       where: { sportId: id },
+      relations: { parentSport: true, teamSports: { team: true } },
     });
     if (!sport) {
       throw ApplicationErrors.notFound(`Sport with id ${id} not found`);
@@ -99,7 +109,84 @@ export class SportsService {
       throw ApplicationErrors.conflict('A sport with this name already exists');
     }
 
+    if (dto.parentSportId !== undefined) {
+      merged.parentSport =
+        dto.parentSportId === null
+          ? null
+          : await this.getValidParent(dto.parentSportId, id);
+    }
+
     const saved = await this.sportRepository.save(merged);
     return this.sportMapper.toResponseDto(saved);
+  }
+
+  /**
+   * Prevents deleting a sport that still has subcategories.
+   *
+   * @param id - Sport identifier.
+   * @returns A confirmation message after deleting the sport.
+   * @throws ApplicationError When the sport does not exist or has children.
+   */
+  async remove(id: number): Promise<{ message: string }> {
+    const sport = await this.sportRepository.findOne({
+      where: { sportId: id },
+    });
+    if (!sport) {
+      throw ApplicationErrors.notFound(`Sport with id ${id} not found`);
+    }
+    if (await this.sportsRepository.hasSubcategories(id)) {
+      throw ApplicationErrors.conflict(
+        `Sport with id ${id} cannot be deleted while it has subcategories`,
+      );
+    }
+
+    await this.sportRepository.remove(sport);
+    return { message: `Sport #${id} deleted successfully` };
+  }
+
+  /**
+   * Retrieves a valid parent and prevents cyclic sport hierarchies.
+   *
+   * @param parentSportId - Proposed parent sport identifier.
+   * @param sportId - Existing sport being updated, if any.
+   * @returns The parent sport with its own parent loaded.
+   * @throws ApplicationError When the parent does not exist or creates a cycle.
+   */
+  private async getValidParent(
+    parentSportId: number,
+    sportId: number | undefined,
+  ): Promise<Sport> {
+    const parent = await this.sportRepository.findOne({
+      where: { sportId: parentSportId },
+      relations: { parentSport: true },
+    });
+    if (!parent) {
+      throw ApplicationErrors.notFound(
+        `Parent sport with id ${parentSportId} not found`,
+      );
+    }
+
+    const visited = new Set<number>();
+    let ancestorId: number | null = parent.sportId;
+    while (ancestorId !== null) {
+      if (ancestorId === sportId) {
+        throw ApplicationErrors.invalidInput(
+          'A sport cannot be its own ancestor',
+        );
+      }
+      if (visited.has(ancestorId)) {
+        throw ApplicationErrors.conflict(
+          'The existing sport hierarchy contains a cycle',
+        );
+      }
+      visited.add(ancestorId);
+      const ancestor = await this.sportRepository.findOne({
+        where: { sportId: ancestorId },
+        relations: { parentSport: true },
+      });
+      ancestorId = ancestor?.parentSport?.sportId ?? null;
+    }
+
+    return parent;
   }
 }

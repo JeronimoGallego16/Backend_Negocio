@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TeamSportMapper } from '../../team-sports/mappers/team-sport.mapper';
 import { SportDto } from '../dto/sport.dto';
 import { SportResponseDto } from '../dto/sport-response.dto';
 import { Sport } from '../entities/sport.entity';
@@ -9,13 +10,23 @@ import { Sport } from '../entities/sport.entity';
 @Injectable()
 export class SportMapper {
   /**
+   * Creates the sport mapper.
+   *
+   * @param teamSportMapper - Mapper for team-sport assignment data.
+   */
+  constructor(private readonly teamSportMapper: TeamSportMapper) {}
+
+  /**
    * Creates a sport entity from request data.
    *
    * @param dto - Sport data supplied by the caller.
    * @returns The populated sport entity.
    */
   toEntity(dto: SportDto): Sport {
-    return Object.assign(new Sport(), dto);
+    return Object.assign(new Sport(), {
+      name: dto.name,
+      description: dto.description,
+    });
   }
 
   /**
@@ -42,6 +53,10 @@ export class SportMapper {
       sportId: entity.sportId,
       name: entity.name,
       description: entity.description,
+      parentSportId: entity.parentSport?.sportId ?? null,
+      teamSports: entity.teamSports
+        ? this.teamSportMapper.toResponseDtoList(entity.teamSports)
+        : undefined,
     };
   }
 

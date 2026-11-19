@@ -1,4 +1,11 @@
-import { IsString, Matches, MaxLength, ValidateIf } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  Matches,
+  MaxLength,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 
 /**
  * Request data for creating or updating a sport.
@@ -14,4 +21,9 @@ export class SportDto {
   @IsString()
   @Matches(/\S/)
   description?: string;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined && value !== null)
+  @IsInt()
+  @Min(1)
+  parentSportId?: number | null;
 }
