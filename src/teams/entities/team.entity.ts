@@ -10,6 +10,8 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import { Match } from '../../matches/entities/match.entity';
+import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 /**
  * Database entity representing a tournament team.
@@ -48,4 +50,15 @@ export class Team {
   })
   @JoinColumn({ name: 'group_id' })
   group?: CompetitionGroup;
+  
+  @OneToMany(() => Match, (match) => match.homeTeam, { cascade: false })
+  homeMatches?: Match[];
+
+  @OneToMany(() => Match, (match) => match.awayTeam, { cascade: false })
+  awayMatches?: Match[];
+
+  @OneToMany(() => TeamSport, (teamSport) => teamSport.team, {
+    cascade: false,
+  })
+  teamSports?: TeamSport[];
 }

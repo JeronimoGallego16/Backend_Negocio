@@ -36,4 +36,20 @@ export class SportsRepository {
 
     return (await query.getCount()) > 0;
   }
+
+  /**
+   * Checks whether a sport has subcategories.
+   *
+   * @param sportId - Parent sport identifier.
+   * @returns Whether at least one subcategory refers to the sport.
+   */
+  async hasSubcategories(sportId: number): Promise<boolean> {
+    const count = await this.sportRepository
+      .createQueryBuilder('subcategory')
+      .innerJoin('subcategory.parentSport', 'parentSport')
+      .where('parentSport.sportId = :sportId', { sportId })
+      .getCount();
+
+    return count > 0;
+  }
 }

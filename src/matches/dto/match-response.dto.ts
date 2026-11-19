@@ -6,4 +6,6 @@ export class MatchResponseDto {
   duration!: string;
   state!: string;
   phaseId?: number;
+  homeTeamId!: number;
+  awayTeamId!: number;
 }

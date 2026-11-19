@@ -59,4 +59,22 @@ export class ApplicationErrors {
   static conflict(message: string): ApplicationError {
     return new ApplicationError(ApplicationErrorCode.CONFLICT, message);
   }
+
+  /**
+   * Checks whether a database error represents a duplicate-key violation.
+   *
+   * @param error - Error returned by a database driver or TypeORM.
+   * @returns Whether the error represents a MySQL duplicate-key violation.
+   */
+  static isDuplicateKeyViolation(error: unknown): boolean {
+    if (typeof error !== 'object' || error === null) return false;
+
+    const driverError = 'driverError' in error ? error.driverError : error;
+    return (
+      typeof driverError === 'object' &&
+      driverError !== null &&
+      'code' in driverError &&
+      driverError.code === 'ER_DUP_ENTRY'
+    );
+  }
 }

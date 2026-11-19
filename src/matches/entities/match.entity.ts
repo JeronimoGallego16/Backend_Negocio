@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Team } from '../../teams/entities/team.entity';
 
 /**
  * Database entity representing a match.
@@ -31,4 +32,20 @@ export class Match {
   })
   @JoinColumn({ name: 'phase_id' })
   phase?: Phase;
+
+  @ManyToOne(() => Team, (team) => team.homeMatches, {
+    cascade: false,
+    nullable: false,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'home_team_id', referencedColumnName: 'teamId' })
+  homeTeam!: Team;
+
+  @ManyToOne(() => Team, (team) => team.awayMatches, {
+    cascade: false,
+    nullable: false,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'away_team_id', referencedColumnName: 'teamId' })
+  awayTeam!: Team;
 }

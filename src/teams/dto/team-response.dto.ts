@@ -1,3 +1,5 @@
+import { TeamSportResponseDto } from '../../team-sports/dto/team-sport-response.dto';
+
 /**
  * Response data representing a team.
  */
@@ -6,4 +8,5 @@ export class TeamResponseDto {
   name!: string;
   category!: string;
   sportId?: number;
+  teamSports?: TeamSportResponseDto[];
 }

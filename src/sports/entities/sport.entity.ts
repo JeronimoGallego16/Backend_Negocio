@@ -3,10 +3,13 @@ import { Tournament } from '../../tournaments/entities/tournament.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 /**
  * Database entity representing a sport.
@@ -30,4 +33,20 @@ export class Sport {
 
   @OneToMany(() => Team, (team) => team.sport, { cascade: false })
   teams?: Team[];
+
+  @ManyToOne(() => Sport, (sport) => sport.subcategories, {
+    cascade: false,
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'parent_id', referencedColumnName: 'sportId' })
+  parentSport?: Sport | null;
+
+  @OneToMany(() => Sport, (sport) => sport.parentSport, { cascade: false })
+  subcategories?: Sport[];
+
+  @OneToMany(() => TeamSport, (teamSport) => teamSport.sport, {
+    cascade: false,
+  })
+  teamSports?: TeamSport[];
 }

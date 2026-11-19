@@ -16,7 +16,10 @@ export class MatchMapper {
    * @returns The populated match entity.
    */
   toEntity(dto: MatchDto): Match {
-    const entity = Object.assign(new Match(), dto);
+    const entity = Object.assign(new Match(), {
+      duration: dto.duration,
+      state: dto.state,
+    });
     if (dto.phaseId !== undefined) {
       entity.phase = { phaseId: dto.phaseId } as Phase;
     }
@@ -51,6 +54,8 @@ export class MatchMapper {
       duration: entity.duration,
       state: entity.state,
       phaseId: entity.phase?.phaseId,
+      homeTeamId: entity.homeTeam.teamId,
+      awayTeamId: entity.awayTeam.teamId,
     };
   }
 

@@ -42,4 +42,22 @@ export class TeamsRepository {
 
     return (await query.getCount()) > 0;
   }
+
+  /**
+   * Checks whether a team participates in any match as either side.
+   *
+   * @param teamId - Team identifier.
+   * @returns Whether a home or away match refers to the team.
+   */
+  async hasMatches(teamId: number): Promise<boolean> {
+    const count = await this.teamRepository
+      .createQueryBuilder('team')
+      .leftJoin('team.homeMatches', 'homeMatch')
+      .leftJoin('team.awayMatches', 'awayMatch')
+      .where('team.teamId = :teamId', { teamId })
+      .andWhere('(homeMatch.matchId IS NOT NULL OR awayMatch.matchId IS NOT NULL)')
+      .getCount();
+
+    return count > 0;
+  }
 }
