@@ -17,7 +17,7 @@ import { PhasesService } from './phases.service';
 /**
  * HTTP endpoints for tournament phases and group assignments.
  */
-@Controller('phases')
+@Controller('api/phases')
 export class PhasesController {
   /**
    * Creates the phases controller.

@@ -15,7 +15,7 @@ import { TournamentsService } from './tournaments.service';
 /**
  * HTTP endpoints for managing tournaments.
  */
-@Controller('tournaments')
+@Controller('api/tournaments')
 export class TournamentsController {
   /**
    * Creates the tournaments controller.

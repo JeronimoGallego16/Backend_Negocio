@@ -15,7 +15,7 @@ import { RegistrationsService } from './registrations.service';
 /**
  * HTTP endpoints for managing tournament registrations.
  */
-@Controller('registrations')
+@Controller('api/registrations')
 export class RegistrationsController {
   /**
    * Creates the registrations controller.
