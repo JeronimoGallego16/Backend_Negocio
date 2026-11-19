@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FinalPhase } from '../entities/final.entity';
-import { Group } from '../entities/group.entity';
+import { GroupPhase } from '../entities/group-phase.entity';
 import { Phase } from '../entities/phase.entity';
 import { PhaseDto } from '../dto/phase.dto';
 import { PhaseResponseDto } from '../dto/phase-response.dto';
@@ -16,7 +16,7 @@ export class PhaseMapper {
    * @param dto - Phase request data.
    * @returns The populated phase entity.
    */
-  toEntity(dto: PhaseDto): Group | FinalPhase {
+  toEntity(dto: PhaseDto): GroupPhase | FinalPhase {
     if (dto.type === 'FINAL') {
       const entity = new FinalPhase();
       entity.name = dto.name!;
@@ -26,11 +26,9 @@ export class PhaseMapper {
       return entity;
     }
 
-    const entity = new Group();
+    const entity = new GroupPhase();
     entity.name = dto.name!;
     entity.order = dto.order!;
-    entity.letterOrNumber = dto.letterOrNumber!;
-    entity.maxTeams = dto.maxTeams!;
     entity.tournamentId = dto.tournamentId!;
     return entity;
   }
@@ -45,12 +43,6 @@ export class PhaseMapper {
   mergeEntity(entity: Phase, dto: PhaseDto): Phase {
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.order !== undefined) entity.order = dto.order;
-    if (entity instanceof Group) {
-      if (dto.letterOrNumber !== undefined) {
-        entity.letterOrNumber = dto.letterOrNumber;
-      }
-      if (dto.maxTeams !== undefined) entity.maxTeams = dto.maxTeams;
-    }
     if (entity instanceof FinalPhase && dto.isThirdPlace !== undefined) {
       entity.isThirdPlace = dto.isThirdPlace;
     }
@@ -69,10 +61,8 @@ export class PhaseMapper {
     response.name = entity.name;
     response.order = entity.order;
     response.tournamentId = entity.tournamentId;
-    if (entity instanceof Group) {
+    if (entity instanceof GroupPhase) {
       response.type = 'GROUP';
-      response.letterOrNumber = entity.letterOrNumber;
-      response.maxTeams = entity.maxTeams;
     } else {
       response.type = 'FINAL';
       response.isThirdPlace = (entity as FinalPhase).isThirdPlace;

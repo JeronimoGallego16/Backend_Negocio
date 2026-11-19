@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
 import { Team } from '../../teams/entities/team.entity';
-import { Group } from '../entities/group.entity';
+import { CompetitionGroup } from '../entities/competition-group.entity';
+import { GroupPhase } from '../entities/group-phase.entity';
 import { Phase } from '../entities/phase.entity';
 
 /**
@@ -16,6 +17,7 @@ export class PhasesRepository {
    *
    * @param phaseRepository - TypeORM repository for phases.
    * @param teamRepository - TypeORM repository for teams.
+   * @param groupRepository - TypeORM repository for competition groups.
    * @param matchRepository - TypeORM repository for matches.
    */
   constructor(
@@ -23,6 +25,8 @@ export class PhasesRepository {
     private readonly phaseRepository: Repository<Phase>,
     @InjectRepository(Team)
     private readonly teamRepository: Repository<Team>,
+    @InjectRepository(CompetitionGroup)
+    private readonly groupRepository: Repository<CompetitionGroup>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
   ) {}
@@ -53,7 +57,7 @@ export class PhasesRepository {
   /**
    * Counts teams currently assigned to a group.
    *
-   * @param groupId - Group phase identifier.
+   * @param groupId - Competition group identifier.
    * @returns Assignment count.
    */
   countGroupTeams(groupId: number): Promise<number> {
@@ -77,15 +81,28 @@ export class PhasesRepository {
   }
 
   /**
-   * Finds a group by identifier.
+   * Finds a competition group by identifier.
    *
    * @param groupId - Group identifier.
    * @returns The matching group or null.
    */
-  findGroup(groupId: number): Promise<Group | null> {
+  findGroup(groupId: number): Promise<CompetitionGroup | null> {
+    return this.groupRepository.findOne({
+      where: { groupId },
+      relations: { phase: true },
+    });
+  }
+
+  /**
+   * Finds a group phase by identifier.
+   *
+   * @param phaseId - Group phase identifier.
+   * @returns The matching group phase or null.
+   */
+  findGroupPhase(phaseId: number): Promise<GroupPhase | null> {
     return this.phaseRepository.manager
-      .getRepository(Group)
-      .findOne({ where: { phaseId: groupId } });
+      .getRepository(GroupPhase)
+      .findOne({ where: { phaseId } });
   }
 
 }

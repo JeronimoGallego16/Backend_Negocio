@@ -7,7 +7,5 @@ export class PhaseResponseDto {
   order!: number;
   tournamentId!: number;
   type!: 'GROUP' | 'FINAL';
-  letterOrNumber?: string;
-  maxTeams?: number;
   isThirdPlace?: boolean;
 }

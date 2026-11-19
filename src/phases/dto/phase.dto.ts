@@ -35,17 +35,6 @@ export class PhaseDto {
   type?: 'GROUP' | 'FINAL';
 
   @IsOptional()
-  @IsString()
-  @Matches(/\S/)
-  @MaxLength(20)
-  letterOrNumber?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  maxTeams?: number;
-
-  @IsOptional()
   @IsBoolean()
   isThirdPlace?: boolean;
 }
