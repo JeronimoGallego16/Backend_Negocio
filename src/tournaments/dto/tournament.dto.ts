@@ -6,7 +6,19 @@ import {
   MaxLength,
   Min,
   ValidateIf,
+  IsIn,
 } from 'class-validator';
+
+/**
+ * Stable tournament lifecycle states.
+ */
+export enum TournamentStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  FINISHED = 'FINISHED',
+  CANCELLED = 'CANCELLED',
+}
 
 /**
  * Request data for creating or updating a tournament.
@@ -36,6 +48,7 @@ export class TournamentDto {
   @IsString()
   @Matches(/\S/)
   @MaxLength(30)
+  @IsIn(Object.values(TournamentStatus))
   status?: string;
 
   @ValidateIf((_object, value: unknown) => value !== undefined)

@@ -1,5 +1,5 @@
 import { ChildEntity, OneToMany } from 'typeorm';
-import { CompetitionGroup } from './competition-group.entity';
+import { CompetitionGroup } from '../../groups/entities/competition-group.entity';
 import { Phase } from './phase.entity';
 
 /**

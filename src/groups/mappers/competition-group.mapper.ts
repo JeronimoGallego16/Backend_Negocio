@@ -24,7 +24,7 @@ export class CompetitionGroupMapper {
   }
 
   /**
-   * Applies supplied updates to a competition group.
+   * Applies supplied updates to an existing group.
    *
    * @param entity - Existing group.
    * @param dto - Group fields to update.

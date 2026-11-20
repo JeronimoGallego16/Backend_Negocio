@@ -22,7 +22,9 @@ export class MatchesController {
    *
    * @param matchesService - Service handling match business logic.
    */
-  constructor(private readonly matchesService: MatchesService) {}
+  constructor(
+    private readonly matchesService: MatchesService,
+  ) {}
 
   /**
    * Creates a match.
@@ -81,4 +83,20 @@ export class MatchesController {
   remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
     return this.matchesService.remove(id);
   }
+
+  /**
+   * Registers a result for a match.
+   *
+   * @param id - Match identifier.
+   * @param dto - Result and match fields.
+   * @returns The updated match.
+   */
+  @Patch(':id/result')
+  registerResult(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: MatchDto,
+  ): Promise<MatchResponseDto> {
+    return this.matchesService.update(id, dto);
+  }
+
 }

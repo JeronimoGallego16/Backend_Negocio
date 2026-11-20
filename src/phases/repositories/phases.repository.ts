@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
 import { Team } from '../../teams/entities/team.entity';
-import { CompetitionGroup } from '../entities/competition-group.entity';
+import { CompetitionGroup } from '../../groups/entities/competition-group.entity';
 import { GroupPhase } from '../entities/group-phase.entity';
 import { Phase } from '../entities/phase.entity';
 

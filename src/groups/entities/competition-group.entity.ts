@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { GroupPhase } from './group-phase.entity';
+import { GroupPhase } from '../../phases/entities/group-phase.entity';
 
 /**
  * Database entity representing a group inside a group phase.

@@ -64,7 +64,10 @@ export class SportsService {
    */
   async findAll(): Promise<SportResponseDto[]> {
     const sports = await this.sportRepository.find({
-      relations: { parentSport: true, teamSports: { team: true } },
+      relations: {
+        parentSport: true,
+        teamSports: { team: true, sport: true },
+      },
     });
     return this.sportMapper.toResponseDtoList(sports);
   }
@@ -79,7 +82,10 @@ export class SportsService {
   async findOne(id: number): Promise<SportResponseDto> {
     const sport = await this.sportRepository.findOne({
       where: { sportId: id },
-      relations: { parentSport: true, teamSports: { team: true } },
+      relations: {
+        parentSport: true,
+        teamSports: { team: true, sport: true },
+      },
     });
     if (!sport) {
       throw ApplicationErrors.notFound(`Sport with id ${id} not found`);
@@ -98,7 +104,10 @@ export class SportsService {
   async update(id: number, dto: SportDto): Promise<SportResponseDto> {
     const sport = await this.sportRepository.findOne({
       where: { sportId: id },
-      relations: { parentSport: true, teamSports: { team: true } },
+      relations: {
+        parentSport: true,
+        teamSports: { team: true, sport: true },
+      },
     });
     if (!sport) {
       throw ApplicationErrors.notFound(`Sport with id ${id} not found`);

@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Registration } from '../../registrations/entities/registration.entity';
 import { Tournament } from '../entities/tournament.entity';
 import { Phase } from '../../phases/entities/phase.entity';
+import { Match } from '../../matches/entities/match.entity';
+import { Team } from '../../teams/entities/team.entity';
 
 /**
  * Repository for tournament-specific queries.
@@ -23,6 +25,10 @@ export class TournamentsRepository {
     private readonly registrationRepository: Repository<Registration>,
     @InjectRepository(Phase)
     private readonly phaseRepository: Repository<Phase>,
+    @InjectRepository(Match)
+    private readonly matchRepository: Repository<Match>,
+    @InjectRepository(Team)
+    private readonly teamRepository: Repository<Team>,
   ) {}
 
   /**
@@ -49,6 +55,36 @@ export class TournamentsRepository {
     return (
       (await this.phaseRepository.count({
         where: { tournamentId },
+      })) > 0
+    );
+  }
+
+  /**
+   * Checks whether any phase of a tournament has matches.
+   *
+   * @param tournamentId - Tournament identifier.
+   * @returns Whether associated matches exist.
+   */
+  async hasMatches(tournamentId: number): Promise<boolean> {
+    return (
+      (await this.matchRepository
+        .createQueryBuilder('match')
+        .innerJoin('match.phase', 'phase')
+        .where('phase.tournamentId = :tournamentId', { tournamentId })
+        .getCount()) > 0
+    );
+  }
+
+  /**
+   * Checks whether teams are registered in a tournament.
+   *
+   * @param tournamentId - Tournament identifier.
+   * @returns Whether registered teams exist.
+   */
+  async hasTeams(tournamentId: number): Promise<boolean> {
+    return (
+      (await this.registrationRepository.count({
+        where: { tournament: { tournamentId } },
       })) > 0
     );
   }

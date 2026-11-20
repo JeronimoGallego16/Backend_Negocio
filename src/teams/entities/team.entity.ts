@@ -1,5 +1,5 @@
 import { Registration } from '../../registrations/entities/registration.entity';
-import { CompetitionGroup } from '../../phases/entities/competition-group.entity';
+import { CompetitionGroup } from '../../groups/entities/competition-group.entity';
 import { Sport } from '../../sports/entities/sport.entity';
 import {
   Column,

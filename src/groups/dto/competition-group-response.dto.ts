@@ -1,5 +1,5 @@
 /**
- * Response data representing a group inside a group phase.
+ * Response data representing a competition group.
  */
 export class CompetitionGroupResponseDto {
   groupId!: number;

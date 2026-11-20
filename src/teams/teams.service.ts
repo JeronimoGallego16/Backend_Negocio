@@ -60,7 +60,7 @@ export class TeamsService {
    */
   async findAll(): Promise<TeamResponseDto[]> {
     const teams = await this.teamRepository.find({
-      relations: { teamSports: { sport: true } },
+      relations: { teamSports: { team: true, sport: true } },
     });
     return this.teamMapper.toResponseDtoList(teams);
   }
@@ -75,7 +75,7 @@ export class TeamsService {
   async findOne(id: number): Promise<TeamResponseDto> {
     const team = await this.teamRepository.findOne({
       where: { teamId: id },
-      relations: { teamSports: { sport: true } },
+      relations: { teamSports: { team: true, sport: true } },
     });
     if (!team) {
       throw ApplicationErrors.notFound(`Team with id ${id} not found`);
@@ -94,7 +94,7 @@ export class TeamsService {
   async update(id: number, dto: TeamDto): Promise<TeamResponseDto> {
     const team = await this.teamRepository.findOne({
       where: { teamId: id },
-      relations: { teamSports: { sport: true } },
+      relations: { teamSports: { team: true, sport: true } },
     });
     if (!team) {
       throw ApplicationErrors.notFound(`Team with id ${id} not found`);

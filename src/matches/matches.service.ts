@@ -8,6 +8,7 @@ import { MatchDto } from './dto/match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { Match } from './entities/match.entity';
 import { MatchMapper } from './mappers/match.mapper';
+import { Tournament } from '../tournaments/entities/tournament.entity';
 
 /**
  * Business logic for managing matches.
@@ -29,6 +30,8 @@ export class MatchesService {
     private readonly teamRepository: Repository<Team>,
     @InjectRepository(Phase)
     private readonly phaseRepository: Repository<Phase>,
+    @InjectRepository(Tournament)
+    private readonly tournamentRepository: Repository<Tournament>,
     private readonly matchMapper: MatchMapper,
   ) {}
 
@@ -43,10 +46,11 @@ export class MatchesService {
       !dto.duration?.trim() ||
       !dto.state?.trim() ||
       dto.homeTeamId === undefined ||
-      dto.awayTeamId === undefined
+      dto.awayTeamId === undefined ||
+      dto.phaseId === undefined
     ) {
       throw ApplicationErrors.invalidInput(
-        'duration, state, homeTeamId, and awayTeamId are required for create',
+        'duration, state, phaseId, homeTeamId, and awayTeamId are required for create',
       );
     }
     this.assertDifferentTeams(dto.homeTeamId, dto.awayTeamId);
@@ -59,10 +63,13 @@ export class MatchesService {
     const match = this.matchMapper.toEntity(dto);
     match.homeTeam = homeTeam;
     match.awayTeam = awayTeam;
-    if (dto.phaseId !== undefined) {
-      match.phase = await this.findPhase(dto.phaseId);
-      match.phaseId = dto.phaseId;
-    }
+    match.phase = await this.findPhase(dto.phaseId);
+    match.phaseId = dto.phaseId;
+    await this.assertTeamsBelongToTournament(
+      dto.phaseId,
+      homeTeam,
+      awayTeam,
+    );
 
     return this.matchMapper.toResponseDto(
       await this.matchRepository.save(match),
@@ -116,6 +123,11 @@ export class MatchesService {
       merged.phase = await this.findPhase(dto.phaseId);
       merged.phaseId = dto.phaseId;
     }
+    await this.assertTeamsBelongToTournament(
+      merged.phaseId ?? merged.phase?.phaseId,
+      merged.homeTeam,
+      merged.awayTeam,
+    );
 
     return this.matchMapper.toResponseDto(
       await this.matchRepository.save(merged),
@@ -132,6 +144,44 @@ export class MatchesService {
     const match = await this.findMatch(id);
     await this.matchRepository.remove(match);
     return { message: `Match #${id} deleted successfully` };
+  }
+
+  /**
+   * Ensures both match teams belong to the phase tournament sport.
+   *
+   * @param phaseId - Phase identifier.
+   * @param homeTeam - Home team.
+   * @param awayTeam - Away team.
+   * @returns Nothing when valid.
+   */
+  private async assertTeamsBelongToTournament(
+    phaseId: number | undefined,
+    homeTeam: Team,
+    awayTeam: Team,
+  ): Promise<void> {
+    if (phaseId === undefined) {
+      throw ApplicationErrors.invalidInput(
+        'A match must be associated with a phase',
+      );
+    }
+    const phase = await this.findPhase(phaseId);
+    const tournament = await this.tournamentRepository.findOne({
+      where: { tournamentId: phase.tournamentId },
+      relations: { sport: true },
+    });
+    if (!tournament) {
+      throw ApplicationErrors.notFound(
+        `Tournament with id ${phase.tournamentId} not found`,
+      );
+    }
+    if (
+      homeTeam.sportId !== tournament.sport.sportId ||
+      awayTeam.sportId !== tournament.sport.sportId
+    ) {
+      throw ApplicationErrors.invalidInput(
+        'Match teams must belong to the phase tournament sport',
+      );
+    }
   }
 
   /**

@@ -57,6 +57,19 @@ export class TournamentsController {
   }
 
   /**
+   * Retrieves the complete competition development structure.
+   *
+   * @param id - Tournament identifier.
+   * @returns Tournament phases, groups and matches.
+   */
+  @Get(':id/development')
+  findDevelopment(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Record<string, unknown>> {
+    return this.tournamentsService.findDevelopment(id);
+  }
+
+  /**
    * Updates a tournament.
    *
    * @param id - Tournament identifier from the route.

@@ -1,6 +1,8 @@
 import {
   IsInt,
   IsString,
+  IsBoolean,
+  IsOptional,
   Matches,
   MaxLength,
   Min,
@@ -37,4 +39,34 @@ export class MatchDto {
   @IsInt()
   @Min(1)
   awayTeamId?: number;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(0)
+  homeScore?: number;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(0)
+  awayScore?: number;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/\S/)
+  @MaxLength(50)
+  roundName?: string;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(1)
+  bracketPosition?: number;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(1)
+  nextMatchId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isThirdPlace?: boolean;
 }

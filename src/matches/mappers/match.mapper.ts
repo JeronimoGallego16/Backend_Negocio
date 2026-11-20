@@ -19,6 +19,14 @@ export class MatchMapper {
     const entity = Object.assign(new Match(), {
       duration: dto.duration,
       state: dto.state,
+      homeScore: dto.homeScore,
+      awayScore: dto.awayScore,
+      roundName: dto.roundName,
+      bracketPosition: dto.bracketPosition,
+      nextMatchId: dto.nextMatchId,
+      isThirdPlace: dto.isThirdPlace ?? false,
+      resultRegistered:
+        dto.homeScore !== undefined && dto.awayScore !== undefined,
     });
     if (dto.phaseId !== undefined) {
       entity.phase = { phaseId: dto.phaseId } as Phase;
@@ -36,6 +44,19 @@ export class MatchMapper {
   mergeEntity(entity: Match, dto: MatchDto): Match {
     if (dto.duration !== undefined) entity.duration = dto.duration;
     if (dto.state !== undefined) entity.state = dto.state;
+    if (dto.homeScore !== undefined) entity.homeScore = dto.homeScore;
+    if (dto.awayScore !== undefined) entity.awayScore = dto.awayScore;
+    if (dto.roundName !== undefined) entity.roundName = dto.roundName;
+    if (dto.bracketPosition !== undefined) {
+      entity.bracketPosition = dto.bracketPosition;
+    }
+    if (dto.nextMatchId !== undefined) entity.nextMatchId = dto.nextMatchId;
+    if (dto.isThirdPlace !== undefined) {
+      entity.isThirdPlace = dto.isThirdPlace;
+    }
+    if (entity.homeScore !== undefined && entity.awayScore !== undefined) {
+      entity.resultRegistered = true;
+    }
     if (dto.phaseId !== undefined) {
       entity.phase = { phaseId: dto.phaseId } as Phase;
     }
@@ -56,6 +77,13 @@ export class MatchMapper {
       phaseId: entity.phase?.phaseId,
       homeTeamId: entity.homeTeam.teamId,
       awayTeamId: entity.awayTeam.teamId,
+      homeScore: entity.homeScore,
+      awayScore: entity.awayScore,
+      roundName: entity.roundName,
+      bracketPosition: entity.bracketPosition,
+      nextMatchId: entity.nextMatchId,
+      isThirdPlace: entity.isThirdPlace ?? false,
+      resultRegistered: entity.resultRegistered ?? false,
     };
   }
 

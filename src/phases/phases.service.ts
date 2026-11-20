@@ -2,36 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationErrors } from '../common/errors/application-error';
-import { Team } from '../teams/entities/team.entity';
+import { CompetitionGroup } from '../groups/entities/competition-group.entity';
 import { Tournament } from '../tournaments/entities/tournament.entity';
-import { AssignTeamDto } from './dto/assign-team.dto';
-import { CompetitionGroupDto } from './dto/competition-group.dto';
-import { CompetitionGroupResponseDto } from './dto/competition-group-response.dto';
 import { PhaseDto } from './dto/phase.dto';
 import { PhaseResponseDto } from './dto/phase-response.dto';
-import { CompetitionGroup } from './entities/competition-group.entity';
 import { FinalPhase } from './entities/final.entity';
 import { GroupPhase } from './entities/group-phase.entity';
 import { Phase } from './entities/phase.entity';
-import { CompetitionGroupMapper } from './mappers/competition-group.mapper';
 import { PhaseMapper } from './mappers/phase.mapper';
 import { PhasesRepository } from './repositories/phases.repository';
 
 /**
- * Business logic for tournament phases, competition groups and assignments.
+ * Service responsible for tournament phase CRUD.
  */
 @Injectable()
 export class PhasesService {
   /**
    * Creates the phases service.
    *
-   * @param phaseRepository - Repository for phases.
-   * @param groupRepository - Repository for competition groups.
-   * @param tournamentRepository - Repository for tournaments.
-   * @param teamRepository - Repository for teams.
-   * @param phasesRepository - Repository for phase-specific queries.
-   * @param phaseMapper - Mapper for phases.
-   * @param groupMapper - Mapper for competition groups.
+   * @param phaseRepository - Phase repository.
+   * @param groupRepository - Competition group repository.
+   * @param tournamentRepository - Tournament repository.
+   * @param phasesRepository - Phase-specific repository.
+   * @param phaseMapper - Phase mapper.
    */
   constructor(
     @InjectRepository(Phase)
@@ -40,11 +33,8 @@ export class PhasesService {
     private readonly groupRepository: Repository<CompetitionGroup>,
     @InjectRepository(Tournament)
     private readonly tournamentRepository: Repository<Tournament>,
-    @InjectRepository(Team)
-    private readonly teamRepository: Repository<Team>,
     private readonly phasesRepository: PhasesRepository,
     private readonly phaseMapper: PhaseMapper,
-    private readonly groupMapper: CompetitionGroupMapper,
   ) {}
 
   /**
@@ -94,21 +84,18 @@ export class PhasesService {
   }
 
   /**
-   * Retrieves a phase by identifier.
+   * Retrieves a phase.
    *
    * @param phaseId - Phase identifier.
    * @returns The matching phase.
    */
   async findOne(phaseId: number): Promise<PhaseResponseDto> {
-    const phase = await this.phaseRepository.findOne({ where: { phaseId } });
-    if (!phase) {
-      throw ApplicationErrors.notFound(`Phase with id ${phaseId} not found`);
-    }
+    const phase = await this.findPhase(phaseId);
     return this.phaseMapper.toResponseDto(phase);
   }
 
   /**
-   * Updates a phase without changing its subtype.
+   * Updates a phase without changing its subtype or tournament.
    *
    * @param phaseId - Phase identifier.
    * @param dto - Fields to update.
@@ -118,9 +105,11 @@ export class PhasesService {
     phaseId: number,
     dto: PhaseDto,
   ): Promise<PhaseResponseDto> {
-    const phase = await this.phaseRepository.findOne({ where: { phaseId } });
-    if (!phase) {
-      throw ApplicationErrors.notFound(`Phase with id ${phaseId} not found`);
+    const phase = await this.findPhase(phaseId);
+    if (dto.tournamentId !== undefined && dto.tournamentId !== phase.tournamentId) {
+      throw ApplicationErrors.invalidInput(
+        'A phase tournament cannot be changed',
+      );
     }
     if (
       dto.type !== undefined &&
@@ -152,13 +141,10 @@ export class PhasesService {
    * Deletes a phase when no associated information prevents it.
    *
    * @param phaseId - Phase identifier.
-   * @returns Nothing when deletion succeeds.
+   * @returns Nothing after deletion.
    */
   async remove(phaseId: number): Promise<void> {
-    const phase = await this.phaseRepository.findOne({ where: { phaseId } });
-    if (!phase) {
-      throw ApplicationErrors.notFound(`Phase with id ${phaseId} not found`);
-    }
+    const phase = await this.findPhase(phaseId);
     if (await this.phasesRepository.hasMatches(phaseId)) {
       throw ApplicationErrors.conflict('A phase with matches cannot be deleted');
     }
@@ -174,237 +160,16 @@ export class PhasesService {
   }
 
   /**
-   * Creates a group inside a group phase.
+   * Finds a phase.
    *
-   * @param phaseId - Parent group phase identifier.
-   * @param dto - Group data.
-   * @returns The created group.
+   * @param phaseId - Phase identifier.
+   * @returns The matching phase.
    */
-  async createGroup(
-    phaseId: number,
-    dto: CompetitionGroupDto,
-  ): Promise<CompetitionGroupResponseDto> {
-    const phase = await this.phasesRepository.findGroupPhase(phaseId);
+  private async findPhase(phaseId: number): Promise<Phase> {
+    const phase = await this.phaseRepository.findOne({ where: { phaseId } });
     if (!phase) {
-      throw ApplicationErrors.notFound(
-        `Group phase with id ${phaseId} not found`,
-      );
+      throw ApplicationErrors.notFound(`Phase with id ${phaseId} not found`);
     }
-    if (!dto.letterOrNumber?.trim() || !dto.maxTeams) {
-      throw ApplicationErrors.invalidInput(
-        'letterOrNumber and maxTeams are required',
-      );
-    }
-    const existing = await this.groupRepository.findOne({
-      where: { phaseId, letterOrNumber: dto.letterOrNumber.trim() },
-    });
-    if (existing) {
-      throw ApplicationErrors.conflict(
-        'That group identifier is already used in the phase',
-      );
-    }
-    const group = this.groupMapper.toEntity(
-      { ...dto, letterOrNumber: dto.letterOrNumber.trim() },
-      phaseId,
-    );
-    return this.groupMapper.toResponseDto(
-      await this.groupRepository.save(group),
-    );
-  }
-
-  /**
-   * Lists all groups inside a group phase.
-   *
-   * @param phaseId - Parent group phase identifier.
-   * @returns The groups in the phase.
-   */
-  async findGroups(phaseId: number): Promise<CompetitionGroupResponseDto[]> {
-    const phase = await this.phasesRepository.findGroupPhase(phaseId);
-    if (!phase) {
-      throw ApplicationErrors.notFound(
-        `Group phase with id ${phaseId} not found`,
-      );
-    }
-    const groups = await this.groupRepository.find({
-      where: { phaseId },
-      order: { groupId: 'ASC' },
-    });
-    return this.groupMapper.toResponseDtoList(groups);
-  }
-
-  /**
-   * Retrieves a competition group.
-   *
-   * @param groupId - Group identifier.
-   * @returns The matching group.
-   */
-  async findGroup(groupId: number): Promise<CompetitionGroupResponseDto> {
-    const group = await this.phasesRepository.findGroup(groupId);
-    if (!group) {
-      throw ApplicationErrors.notFound(
-        `Competition group with id ${groupId} not found`,
-      );
-    }
-    return this.groupMapper.toResponseDto(group);
-  }
-
-  /**
-   * Updates a competition group.
-   *
-   * @param groupId - Group identifier.
-   * @param dto - Fields to update.
-   * @returns The updated group.
-   */
-  async updateGroup(
-    groupId: number,
-    dto: CompetitionGroupDto,
-  ): Promise<CompetitionGroupResponseDto> {
-    const group = await this.phasesRepository.findGroup(groupId);
-    if (!group) {
-      throw ApplicationErrors.notFound(
-        `Competition group with id ${groupId} not found`,
-      );
-    }
-    if (dto.letterOrNumber !== undefined) {
-      const duplicate = await this.groupRepository.findOne({
-        where: {
-          phaseId: group.phaseId,
-          letterOrNumber: dto.letterOrNumber.trim(),
-        },
-      });
-      if (duplicate && duplicate.groupId !== groupId) {
-        throw ApplicationErrors.conflict(
-          'That group identifier is already used in the phase',
-        );
-      }
-    }
-    if (
-      dto.maxTeams !== undefined &&
-      dto.maxTeams < (await this.phasesRepository.countGroupTeams(groupId))
-    ) {
-      throw ApplicationErrors.invalidInput(
-        'maxTeams cannot be lower than the current team count',
-      );
-    }
-    const saved = await this.groupRepository.save(
-      this.groupMapper.mergeEntity(group, {
-        ...dto,
-        letterOrNumber: dto.letterOrNumber?.trim(),
-      }),
-    );
-    return this.groupMapper.toResponseDto(saved);
-  }
-
-  /**
-   * Deletes an empty competition group.
-   *
-   * @param groupId - Group identifier.
-   * @returns Nothing when deletion succeeds.
-   */
-  async removeGroup(groupId: number): Promise<void> {
-    const group = await this.phasesRepository.findGroup(groupId);
-    if (!group) {
-      throw ApplicationErrors.notFound(
-        `Competition group with id ${groupId} not found`,
-      );
-    }
-    if ((await this.phasesRepository.countGroupTeams(groupId)) > 0) {
-      throw ApplicationErrors.conflict(
-        'A competition group with assigned teams cannot be deleted',
-      );
-    }
-    await this.groupRepository.remove(group);
-  }
-
-  /**
-   * Assigns a team to a competition group.
-   *
-   * @param groupId - Group identifier.
-   * @param dto - Team identifier.
-   * @returns The created assignment.
-   */
-  async assignTeam(
-    groupId: number,
-    dto: AssignTeamDto,
-  ): Promise<{ teamId: number; groupId: number }> {
-    const group = await this.phasesRepository.findGroup(groupId);
-    if (!group) {
-      throw ApplicationErrors.notFound(
-        `Competition group with id ${groupId} not found`,
-      );
-    }
-    const tournament = await this.tournamentRepository.findOne({
-      where: { tournamentId: group.phase.tournamentId },
-      relations: { sport: true },
-    });
-    if (!tournament) {
-      throw ApplicationErrors.notFound(
-        `Tournament with id ${group.phase.tournamentId} not found`,
-      );
-    }
-    const team = await this.teamRepository.findOne({
-      where: { teamId: dto.teamId },
-    });
-    if (!team) {
-      throw ApplicationErrors.notFound(`Team with id ${dto.teamId} not found`);
-    }
-    if (team.sportId !== tournament.sport.sportId) {
-      throw ApplicationErrors.invalidInput(
-        'The team and tournament must belong to the same sport',
-      );
-    }
-    if (team.groupId !== undefined && team.groupId !== null) {
-      throw ApplicationErrors.conflict('The team is already assigned to a group');
-    }
-    if (
-      (await this.phasesRepository.countGroupTeams(groupId)) >= group.maxTeams
-    ) {
-      throw ApplicationErrors.conflict('The group capacity has been reached');
-    }
-    team.group = group;
-    team.groupId = group.groupId;
-    await this.teamRepository.save(team);
-    return { teamId: team.teamId, groupId: group.groupId };
-  }
-
-  /**
-   * Lists teams assigned to a competition group.
-   *
-   * @param groupId - Group identifier.
-   * @returns The assigned teams.
-   */
-  async findGroupTeams(
-    groupId: number,
-  ): Promise<{ teamId: number; name: string; category: string }[]> {
-    if (!await this.phasesRepository.findGroup(groupId)) {
-      throw ApplicationErrors.notFound(
-        `Competition group with id ${groupId} not found`,
-      );
-    }
-    const teams = await this.teamRepository.find({ where: { groupId } });
-    return teams.map((team) => ({
-      teamId: team.teamId,
-      name: team.name,
-      category: team.category,
-    }));
-  }
-
-  /**
-   * Removes a team assignment from a competition group.
-   *
-   * @param groupId - Group identifier.
-   * @param teamId - Team identifier.
-   * @returns Nothing when removal succeeds.
-   */
-  async removeTeam(groupId: number, teamId: number): Promise<void> {
-    const team = await this.teamRepository.findOne({
-      where: { teamId, groupId },
-    });
-    if (!team) {
-      throw ApplicationErrors.notFound('Team assignment not found');
-    }
-    team.group = undefined;
-    team.groupId = undefined;
-    await this.teamRepository.save(team);
+    return phase;
   }
 }
