@@ -28,6 +28,9 @@ export class MatchDto {
   @Min(1)
   phaseId?: number;
 
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(1)
   homeTeamId?: number;
 
   @ValidateIf((_object, value: unknown) => value !== undefined)
