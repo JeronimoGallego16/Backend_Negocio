@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ApplicationErrors } from '../common/errors/application-error';
 import { Phase } from '../phases/entities/phase.entity';
 import { Team } from '../teams/entities/team.entity';
+import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { MatchDto } from './dto/match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { Match } from './entities/match.entity';
@@ -21,6 +22,8 @@ export class MatchesService {
    * @param matchRepository - Match repository.
    * @param teamRepository - Team repository.
    * @param phaseRepository - Phase repository.
+   * @param teamSportRepository - Repository for team-sport assignments.
+   * @param tournamentRepository - Tournament repository.
    * @param matchMapper - Match mapper.
    */
   constructor(
@@ -30,6 +33,8 @@ export class MatchesService {
     private readonly teamRepository: Repository<Team>,
     @InjectRepository(Phase)
     private readonly phaseRepository: Repository<Phase>,
+    @InjectRepository(TeamSport)
+    private readonly teamSportRepository: Repository<TeamSport>,
     @InjectRepository(Tournament)
     private readonly tournamentRepository: Repository<Tournament>,
     private readonly matchMapper: MatchMapper,
@@ -55,6 +60,7 @@ export class MatchesService {
     }
     this.assertDifferentTeams(dto.homeTeamId, dto.awayTeamId);
 
+    const phase = await this.findPhase(dto.phaseId);
     const [homeTeam, awayTeam] = await Promise.all([
       this.findTeam(dto.homeTeamId),
       this.findTeam(dto.awayTeamId),
@@ -63,12 +69,12 @@ export class MatchesService {
     const match = this.matchMapper.toEntity(dto);
     match.homeTeam = homeTeam;
     match.awayTeam = awayTeam;
-    match.phase = await this.findPhase(dto.phaseId);
+    match.phase = phase;
     match.phaseId = dto.phaseId;
     await this.assertTeamsBelongToTournament(
-      dto.phaseId,
-      homeTeam,
-      awayTeam,
+      phase,
+      homeTeam.teamId,
+      awayTeam.teamId,
     );
 
     return this.matchMapper.toResponseDto(
@@ -123,10 +129,22 @@ export class MatchesService {
       merged.phase = await this.findPhase(dto.phaseId);
       merged.phaseId = dto.phaseId;
     }
+    const phaseId = merged.phaseId ?? merged.phase?.phaseId;
+    if (phaseId === undefined) {
+      throw ApplicationErrors.invalidInput(
+        'A match must be associated with a phase',
+      );
+    }
+    const phase =
+      dto.phaseId === undefined && merged.phase
+        ? merged.phase
+        : await this.findPhase(phaseId);
+    merged.phase = phase;
+    merged.phaseId = phase.phaseId;
     await this.assertTeamsBelongToTournament(
-      merged.phaseId ?? merged.phase?.phaseId,
-      merged.homeTeam,
-      merged.awayTeam,
+      phase,
+      merged.homeTeam.teamId,
+      merged.awayTeam.teamId,
     );
 
     return this.matchMapper.toResponseDto(
@@ -147,24 +165,18 @@ export class MatchesService {
   }
 
   /**
-   * Ensures both match teams belong to the phase tournament sport.
+   * Ensures both teams have an explicit assignment to the phase tournament sport.
    *
-   * @param phaseId - Phase identifier.
-   * @param homeTeam - Home team.
-   * @param awayTeam - Away team.
+   * @param phase - Existing phase.
+   * @param homeTeamId - Home team identifier.
+   * @param awayTeamId - Away team identifier.
    * @returns Nothing when valid.
    */
   private async assertTeamsBelongToTournament(
-    phaseId: number | undefined,
-    homeTeam: Team,
-    awayTeam: Team,
+    phase: Phase,
+    homeTeamId: number,
+    awayTeamId: number,
   ): Promise<void> {
-    if (phaseId === undefined) {
-      throw ApplicationErrors.invalidInput(
-        'A match must be associated with a phase',
-      );
-    }
-    const phase = await this.findPhase(phaseId);
     const tournament = await this.tournamentRepository.findOne({
       where: { tournamentId: phase.tournamentId },
       relations: { sport: true },
@@ -174,10 +186,23 @@ export class MatchesService {
         `Tournament with id ${phase.tournamentId} not found`,
       );
     }
-    if (
-      homeTeam.sportId !== tournament.sport.sportId ||
-      awayTeam.sportId !== tournament.sport.sportId
-    ) {
+    const sportId = tournament.sport.sportId;
+    const [homeAssignment, awayAssignment] = await Promise.all([
+      this.teamSportRepository.findOne({
+        where: {
+          team: { teamId: homeTeamId },
+          sport: { sportId },
+        },
+      }),
+      this.teamSportRepository.findOne({
+        where: {
+          team: { teamId: awayTeamId },
+          sport: { sportId },
+        },
+      }),
+    ]);
+
+    if (!homeAssignment || !awayAssignment) {
       throw ApplicationErrors.invalidInput(
         'Match teams must belong to the phase tournament sport',
       );

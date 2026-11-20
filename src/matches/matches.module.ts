@@ -7,13 +7,14 @@ import { Phase } from '../phases/entities/phase.entity';
 import { MatchesController } from './matches.controller';
 import { MatchesService } from './matches.service';
 import { Tournament } from '../tournaments/entities/tournament.entity';
+import { TeamSport } from '../team-sports/entities/team-sport.entity';
 
 /**
  * NestJS module for the matches domain.
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Match, Team, Phase, Tournament]),
+    TypeOrmModule.forFeature([Match, Team, Phase, TeamSport, Tournament]),
   ],
   controllers: [MatchesController],
   providers: [MatchesService, MatchMapper],
