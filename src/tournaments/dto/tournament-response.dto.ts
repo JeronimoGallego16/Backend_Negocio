@@ -7,6 +7,7 @@ export class TournamentResponseDto {
   modality!: string;
   startDate!: string;
   endDate!: string;
+  registrationEndDate!: string | null;
   status!: string;
   capacity!: number;
   sportId!: number;

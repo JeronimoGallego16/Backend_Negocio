@@ -57,10 +57,12 @@ export class RegistrationsController {
    * Removes a registration.
    *
    * @param id - Registration identifier from the route.
-   * @returns Nothing when removal succeeds.
+   * @returns A confirmation message after withdrawal.
    */
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.registrationsService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string }> {
+    return this.registrationsService.remove(id);
   }
 }

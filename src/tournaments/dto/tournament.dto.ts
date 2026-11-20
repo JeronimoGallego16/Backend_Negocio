@@ -7,6 +7,7 @@ import {
   Min,
   ValidateIf,
   IsIn,
+  IsOptional,
 } from 'class-validator';
 
 /**
@@ -14,6 +15,7 @@ import {
  */
 export enum TournamentStatus {
   DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
   PUBLISHED = 'PUBLISHED',
   IN_PROGRESS = 'IN_PROGRESS',
   FINISHED = 'FINISHED',
@@ -43,6 +45,10 @@ export class TournamentDto {
   @ValidateIf((_object, value: unknown) => value !== undefined)
   @IsDateString()
   endDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  registrationEndDate?: string | null;
 
   @ValidateIf((_object, value: unknown) => value !== undefined)
   @IsString()

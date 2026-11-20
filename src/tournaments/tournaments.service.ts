@@ -52,7 +52,11 @@ export class TournamentsService {
    */
   async create(dto: TournamentDto): Promise<TournamentResponseDto> {
     this.validateRequiredFields(dto);
-    this.validateDates(dto.startDate!, dto.endDate!);
+    this.validateDates(
+      dto.startDate!,
+      dto.endDate!,
+      dto.registrationEndDate,
+    );
     if (await this.tournamentsRepository.existsByName(dto.name!)) {
       throw ApplicationErrors.conflict('A tournament with this name already exists');
     }
@@ -211,7 +215,11 @@ export class TournamentsService {
     if (!merged.name?.trim() || !merged.modality?.trim() || !merged.startDate || !merged.endDate || !merged.status || !merged.capacity || !merged.sport) {
       throw ApplicationErrors.invalidInput('Tournament fields cannot be empty');
     }
-    this.validateDates(merged.startDate, merged.endDate);
+    this.validateDates(
+      merged.startDate,
+      merged.endDate,
+      merged.registrationEndDate,
+    );
     if (await this.tournamentsRepository.existsByName(merged.name, id)) {
       throw ApplicationErrors.conflict('A tournament with this name already exists');
     }
@@ -340,15 +348,28 @@ export class TournamentsService {
   }
 
   /**
-   * Validates chronological tournament dates.
+   * Validates tournament and registration period dates.
    *
    * @param startDate - Tournament start date.
    * @param endDate - Tournament end date.
+   * @param registrationEndDate - Optional final date for registration.
    * @returns Nothing when valid.
    */
-  private validateDates(startDate: string, endDate: string): void {
+  private validateDates(
+    startDate: string,
+    endDate: string,
+    registrationEndDate?: string | null,
+  ): void {
     if (new Date(startDate).getTime() > new Date(endDate).getTime()) {
       throw ApplicationErrors.invalidInput('startDate cannot be after endDate');
+    }
+    if (
+      registrationEndDate &&
+      new Date(registrationEndDate).getTime() > new Date(startDate).getTime()
+    ) {
+      throw ApplicationErrors.invalidInput(
+        'registrationEndDate cannot be after startDate',
+      );
     }
   }
 }

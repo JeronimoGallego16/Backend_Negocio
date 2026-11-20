@@ -29,6 +29,9 @@ export class Tournament {
   @Column({ name: 'end_date', type: 'date' })
   endDate!: string;
 
+  @Column({ name: 'registration_end_date', type: 'date', nullable: true })
+  registrationEndDate?: string | null;
+
   @Column({ name: 'status', type: 'varchar', length: 30 })
   status!: string;
 

@@ -35,6 +35,9 @@ export class TournamentMapper {
     if (dto.modality !== undefined) entity.modality = dto.modality;
     if (dto.startDate !== undefined) entity.startDate = dto.startDate;
     if (dto.endDate !== undefined) entity.endDate = dto.endDate;
+    if (dto.registrationEndDate !== undefined) {
+      entity.registrationEndDate = dto.registrationEndDate;
+    }
     if (dto.status !== undefined) entity.status = dto.status;
     if (dto.capacity !== undefined) entity.capacity = dto.capacity;
     if (dto.sportId !== undefined) {
@@ -56,6 +59,7 @@ export class TournamentMapper {
       modality: entity.modality,
       startDate: entity.startDate,
       endDate: entity.endDate,
+      registrationEndDate: entity.registrationEndDate ?? null,
       status: entity.status,
       capacity: entity.capacity,
       sportId: entity.sport.sportId,
