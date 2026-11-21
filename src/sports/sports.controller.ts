@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -68,5 +69,16 @@ export class SportsController {
     @Body() dto: SportDto,
   ): Promise<SportResponseDto> {
     return this.sportsService.update(id, dto);
+  }
+
+  /**
+   * Deletes a sport that has no subcategories.
+   *
+   * @param id - Sport identifier from the route.
+   * @returns A confirmation message.
+   */
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    return this.sportsService.remove(id);
   }
 }

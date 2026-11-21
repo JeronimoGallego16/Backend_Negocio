@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 /**
- * Creates the sports table and its unique-name constraint.
+ * Creates the sports table, unique-name constraint, and parent hierarchy.
  */
 export class CreateSports20261110150100 implements MigrationInterface {
   name = 'CreateSports20261110150100';
@@ -24,10 +24,25 @@ export class CreateSports20261110150100 implements MigrationInterface {
             isGenerated: true,
             generationStrategy: 'increment',
           },
+          {
+            name: 'parent_id',
+            type: 'int',
+            isNullable: true,
+          },
           { name: 'name', type: 'varchar', length: '120', isNullable: false },
           { name: 'description', type: 'text', isNullable: false },
         ],
         uniques: [{ name: 'uq_sports_name', columnNames: ['name'] }],
+        foreignKeys: [
+          {
+            name: 'fk_sports_parent',
+            columnNames: ['parent_id'],
+            referencedTableName: 'sports',
+            referencedColumnNames: ['sport_id'],
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION',
+          },
+        ],
       }),
     );
   }

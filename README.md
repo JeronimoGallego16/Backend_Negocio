@@ -40,6 +40,21 @@ Clients can send it as `Authorization: Bearer <token>` or use the security
 service's HttpOnly session cookie. Cookie-based requests require credentialed
 requests to be enabled in the frontend and backend.
 
+## Tournament registrations
+
+Registrations are managed through `POST /api/registrations`,
+`GET /api/registrations?tournamentId=:id`,
+`GET /api/registrations?teamId=:id`, and
+`DELETE /api/registrations/:registrationId`.
+
+The registration request requires `tournamentId` and `teamId`. The tournament
+must have status `OPEN`, the current date must be before its start date, and
+the team must be assigned to the tournament sport through `team_sports`.
+`registrationEndDate` is an optional tournament field; when supplied, it is
+inclusive, and registration closes after that date. If omitted, registration
+closes when the tournament starts. Withdrawals follow the same status and date
+rules. Bulk registration is not currently supported.
+
 ## Compile and run the project
 
 ```bash

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TeamSportMapper } from '../../team-sports/mappers/team-sport.mapper';
 import { TeamDto } from '../dto/team.dto';
 import { TeamResponseDto } from '../dto/team-response.dto';
 import { Team } from '../entities/team.entity';
@@ -8,6 +9,13 @@ import { Team } from '../entities/team.entity';
  */
 @Injectable()
 export class TeamMapper {
+  /**
+   * Creates the team mapper.
+   *
+   * @param teamSportMapper - Mapper for team-sport assignment data.
+   */
+  constructor(private readonly teamSportMapper: TeamSportMapper) {}
+
   /**
    * Creates a team entity from request data.
    *
@@ -28,6 +36,7 @@ export class TeamMapper {
   mergeEntity(entity: Team, dto: TeamDto): Team {
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.category !== undefined) entity.category = dto.category;
+    if (dto.sportId !== undefined) entity.sportId = dto.sportId;
     return entity;
   }
 
@@ -42,6 +51,10 @@ export class TeamMapper {
       teamId: entity.teamId,
       name: entity.name,
       category: entity.category,
+      sportId: entity.sportId,
+      teamSports: entity.teamSports
+        ? this.teamSportMapper.toResponseDtoList(entity.teamSports)
+        : undefined,
     };
   }
 

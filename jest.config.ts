@@ -16,6 +16,7 @@ const config: Config = {
   testRegex: '.*\\.spec\\.ts$',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
+<<<<<<< HEAD
     '^.+\\.(t|j)s$': [
       'ts-jest',
       {
@@ -23,6 +24,9 @@ const config: Config = {
         tsconfig: { module: 'ESNext', moduleResolution: 'Bundler' },
       },
     ],
+=======
+    '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: { rootDir: '.' } }],
+>>>>>>> origin/develop
   },
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
   collectCoverageFrom: [

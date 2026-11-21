@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -68,5 +69,16 @@ export class TeamsController {
     @Body() dto: TeamDto,
   ): Promise<TeamResponseDto> {
     return this.teamsService.update(id, dto);
+  }
+
+  /**
+   * Deletes a team that has no associated matches.
+   *
+   * @param id - Team identifier from the route.
+   * @returns A confirmation message.
+   */
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    return this.teamsService.remove(id);
   }
 }

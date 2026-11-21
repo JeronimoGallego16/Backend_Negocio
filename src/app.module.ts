@@ -21,7 +21,15 @@ import { SkillsModule } from './skills/skills.module';
 import { SportsModule } from './sports/sports.module';
 import { Sport } from './sports/entities/sport.entity';
 import { TeamsModule } from './teams/teams.module';
+<<<<<<< HEAD
 import { Team } from './teams/entities/team.entity';
+=======
+import { TournamentsModule } from './tournaments/tournaments.module';
+import { RegistrationsModule } from './registrations/registrations.module';
+import { PhasesModule } from './phases/phases.module';
+import { TeamSportsModule } from './team-sports/team-sports.module';
+import { GroupsModule } from './groups/groups.module';
+>>>>>>> origin/develop
 
 @Module({
   imports: [
@@ -52,12 +60,20 @@ import { Team } from './teams/entities/team.entity';
     TeamsModule,
     SportsModule,
     MatchesModule,
+<<<<<<< HEAD
     PlayersModule,
     SkillsModule,
     PlayerSkillsModule,
     PlayerTeamsModule,
     PlayerProfileModule,
     AnnotationsModule,
+=======
+    TournamentsModule,
+    RegistrationsModule,
+    PhasesModule,
+    TeamSportsModule,
+    GroupsModule,
+>>>>>>> origin/develop
   ],
   controllers: [AppController],
   providers: [

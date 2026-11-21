@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MatchDto } from '../dto/match.dto';
 import { MatchResponseDto } from '../dto/match-response.dto';
 import { Match } from '../entities/match.entity';
+import { Phase } from '../../phases/entities/phase.entity';
 
 /**
  * Maps match request data to entities and entities to responses.
@@ -15,7 +16,22 @@ export class MatchMapper {
    * @returns The populated match entity.
    */
   toEntity(dto: MatchDto): Match {
-    return Object.assign(new Match(), dto);
+    const entity = Object.assign(new Match(), {
+      duration: dto.duration,
+      state: dto.state,
+      homeScore: dto.homeScore,
+      awayScore: dto.awayScore,
+      roundName: dto.roundName,
+      bracketPosition: dto.bracketPosition,
+      nextMatchId: dto.nextMatchId,
+      isThirdPlace: dto.isThirdPlace ?? false,
+      resultRegistered:
+        dto.homeScore !== undefined && dto.awayScore !== undefined,
+    });
+    if (dto.phaseId !== undefined) {
+      entity.phase = { phaseId: dto.phaseId } as Phase;
+    }
+    return entity;
   }
 
   /**
@@ -28,6 +44,22 @@ export class MatchMapper {
   mergeEntity(entity: Match, dto: MatchDto): Match {
     if (dto.duration !== undefined) entity.duration = dto.duration;
     if (dto.state !== undefined) entity.state = dto.state;
+    if (dto.homeScore !== undefined) entity.homeScore = dto.homeScore;
+    if (dto.awayScore !== undefined) entity.awayScore = dto.awayScore;
+    if (dto.roundName !== undefined) entity.roundName = dto.roundName;
+    if (dto.bracketPosition !== undefined) {
+      entity.bracketPosition = dto.bracketPosition;
+    }
+    if (dto.nextMatchId !== undefined) entity.nextMatchId = dto.nextMatchId;
+    if (dto.isThirdPlace !== undefined) {
+      entity.isThirdPlace = dto.isThirdPlace;
+    }
+    if (entity.homeScore !== undefined && entity.awayScore !== undefined) {
+      entity.resultRegistered = true;
+    }
+    if (dto.phaseId !== undefined) {
+      entity.phase = { phaseId: dto.phaseId } as Phase;
+    }
     return entity;
   }
 
@@ -42,6 +74,16 @@ export class MatchMapper {
       matchId: entity.matchId,
       duration: entity.duration,
       state: entity.state,
+      phaseId: entity.phase?.phaseId,
+      homeTeamId: entity.homeTeam.teamId,
+      awayTeamId: entity.awayTeam.teamId,
+      homeScore: entity.homeScore,
+      awayScore: entity.awayScore,
+      roundName: entity.roundName,
+      bracketPosition: entity.bracketPosition,
+      nextMatchId: entity.nextMatchId,
+      isThirdPlace: entity.isThirdPlace ?? false,
+      resultRegistered: entity.resultRegistered ?? false,
     };
   }
 
