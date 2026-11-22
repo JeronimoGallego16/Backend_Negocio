@@ -16,7 +16,7 @@ import { GroupsService } from './groups.service';
 /**
  * HTTP endpoints for competition group management.
  */
-@Controller('api')
+@Controller()
 export class GroupsController {
   /**
    * Creates the groups controller.

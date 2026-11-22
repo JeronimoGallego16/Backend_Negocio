@@ -1,18 +1,15 @@
-<<<<<<< HEAD
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import type { Relation } from 'typeorm';
-import { Annotation } from '../../annotations/entities/annotation.entity';
-=======
-import { Phase } from '../../phases/entities/phase.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
+import { Annotation } from '../../annotations/entities/annotation.entity';
+import { Phase } from '../../phases/entities/phase.entity';
 import { Team } from '../../teams/entities/team.entity';
->>>>>>> origin/develop
 
 /**
  * Database entity representing a match.
@@ -28,10 +25,9 @@ export class Match {
   @Column({ name: 'state', type: 'varchar', length: 50 })
   state!: string;
 
-<<<<<<< HEAD
   @OneToMany(() => Annotation, (annotation) => annotation.match)
   annotations!: Relation<Annotation[]>;
-=======
+
   @Column({ name: 'home_score', type: 'int', nullable: true })
   homeScore?: number;
 
@@ -87,5 +83,4 @@ export class Match {
   })
   @JoinColumn({ name: 'away_team_id', referencedColumnName: 'teamId' })
   awayTeam!: Team;
->>>>>>> origin/develop
 }

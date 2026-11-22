@@ -17,19 +17,19 @@ depends on the independent skills module to validate skill references.
 
 | Method             | Route                                         | Purpose                                    |
 | ------------------ | --------------------------------------------- | ------------------------------------------ |
-| POST, GET          | `/players`                                    | Create or list players                     |
-| GET, PATCH, DELETE | `/players/:id`                                | Read, update, or remove a player           |
-| GET                | `/players/:id/profile`                        | Read a player with skills and team history |
-| POST, GET          | `/skills`                                     | Create or list skills                      |
-| GET, PATCH, DELETE | `/skills/:id`                                 | Read, update, or remove a skill            |
-| POST, GET          | `/players/:playerId/skills`                   | Assign or list a player's skills           |
-| PATCH, DELETE      | `/players/:playerId/skills/:skillId`          | Update or remove an assignment             |
-| GET                | `/skills/:skillId/players`                    | List players assigned to a skill           |
-| POST, GET          | `/teams/:teamId/players`                      | Assign or list a team's players            |
-| PATCH              | `/teams/:teamId/players/:playerId/retirement` | End an active membership                   |
-| GET                | `/players/:playerId/teams`                    | Read a player's team history               |
-| POST, GET          | `/matches/:matchId/annotations`               | Create or list match annotations           |
-| PATCH, DELETE      | `/annotations/:annotationId`                  | Update or void an annotation               |
+| POST, GET          | `/api/players`                                    | Create or list players                     |
+| GET, PATCH, DELETE | `/api/players/:id`                                | Read, update, or remove a player           |
+| GET                | `/api/players/:id/profile`                        | Read a player with skills and team history |
+| POST, GET          | `/api/skills`                                     | Create or list skills                      |
+| GET, PATCH, DELETE | `/api/skills/:id`                                | Read, update, or remove a skill            |
+| POST, GET          | `/api/players/:playerId/skills`                   | Assign or list a player's skills           |
+| PATCH, DELETE      | `/api/players/:playerId/skills/:skillId`          | Update or remove an assignment             |
+| GET                | `/api/skills/:skillId/players`                    | List players assigned to a skill           |
+| POST, GET          | `/api/teams/:teamId/players`                      | Assign or list a team's players            |
+| PATCH              | `/api/teams/:teamId/players/:playerId/retirement` | End an active membership                   |
+| GET                | `/api/players/:playerId/teams`                    | Read a player's team history               |
+| POST, GET          | `/api/matches/:matchId/annotations`               | Create or list match annotations           |
+| PATCH, DELETE      | `/api/annotations/:annotationId`                  | Update or void an annotation               |
 
 All routes remain protected by the application's global security guard.
 

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, RequestMethod } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
@@ -13,6 +13,9 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api', {
+      exclude: [{ path: '/', method: RequestMethod.ALL }],
+    });
     await app.init();
   });
 
@@ -29,32 +32,39 @@ describe('AppController (e2e)', () => {
       });
   });
 
-  it('registers the player-domain routes', async () => {
+  it('registers the business and player-domain routes', async () => {
     const probes = [
-      () => request(app.getHttpServer()).post('/players'),
-      () => request(app.getHttpServer()).get('/players'),
-      () => request(app.getHttpServer()).get('/players/1/profile'),
-      () => request(app.getHttpServer()).get('/players/1'),
-      () => request(app.getHttpServer()).patch('/players/1'),
-      () => request(app.getHttpServer()).delete('/players/1'),
-      () => request(app.getHttpServer()).post('/skills'),
-      () => request(app.getHttpServer()).get('/skills'),
-      () => request(app.getHttpServer()).get('/skills/1'),
-      () => request(app.getHttpServer()).patch('/skills/1'),
-      () => request(app.getHttpServer()).delete('/skills/1'),
-      () => request(app.getHttpServer()).post('/players/1/skills'),
-      () => request(app.getHttpServer()).get('/players/1/skills'),
-      () => request(app.getHttpServer()).patch('/players/1/skills/1'),
-      () => request(app.getHttpServer()).delete('/players/1/skills/1'),
-      () => request(app.getHttpServer()).get('/skills/1/players'),
-      () => request(app.getHttpServer()).post('/teams/1/players'),
-      () => request(app.getHttpServer()).get('/teams/1/players'),
-      () => request(app.getHttpServer()).patch('/teams/1/players/1/retirement'),
-      () => request(app.getHttpServer()).get('/players/1/teams'),
-      () => request(app.getHttpServer()).post('/matches/1/annotations'),
-      () => request(app.getHttpServer()).get('/matches/1/annotations'),
-      () => request(app.getHttpServer()).patch('/annotations/1'),
-      () => request(app.getHttpServer()).delete('/annotations/1'),
+      () => request(app.getHttpServer()).get('/api/teams'),
+      () => request(app.getHttpServer()).get('/api/sports'),
+      () => request(app.getHttpServer()).get('/api/team-sports'),
+      () => request(app.getHttpServer()).get('/api/matches'),
+      () => request(app.getHttpServer()).get('/api/tournaments'),
+      () => request(app.getHttpServer()).get('/api/registrations'),
+      () => request(app.getHttpServer()).get('/api/phases'),
+      () => request(app.getHttpServer()).post('/api/players'),
+      () => request(app.getHttpServer()).get('/api/players'),
+      () => request(app.getHttpServer()).get('/api/players/1/profile'),
+      () => request(app.getHttpServer()).get('/api/players/1'),
+      () => request(app.getHttpServer()).patch('/api/players/1'),
+      () => request(app.getHttpServer()).delete('/api/players/1'),
+      () => request(app.getHttpServer()).post('/api/skills'),
+      () => request(app.getHttpServer()).get('/api/skills'),
+      () => request(app.getHttpServer()).get('/api/skills/1'),
+      () => request(app.getHttpServer()).patch('/api/skills/1'),
+      () => request(app.getHttpServer()).delete('/api/skills/1'),
+      () => request(app.getHttpServer()).post('/api/players/1/skills'),
+      () => request(app.getHttpServer()).get('/api/players/1/skills'),
+      () => request(app.getHttpServer()).patch('/api/players/1/skills/1'),
+      () => request(app.getHttpServer()).delete('/api/players/1/skills/1'),
+      () => request(app.getHttpServer()).get('/api/skills/1/players'),
+      () => request(app.getHttpServer()).post('/api/teams/1/players'),
+      () => request(app.getHttpServer()).get('/api/teams/1/players'),
+      () => request(app.getHttpServer()).patch('/api/teams/1/players/1/retirement'),
+      () => request(app.getHttpServer()).get('/api/players/1/teams'),
+      () => request(app.getHttpServer()).post('/api/matches/1/annotations'),
+      () => request(app.getHttpServer()).get('/api/matches/1/annotations'),
+      () => request(app.getHttpServer()).patch('/api/annotations/1'),
+      () => request(app.getHttpServer()).delete('/api/annotations/1'),
     ];
 
     for (const probe of probes) {

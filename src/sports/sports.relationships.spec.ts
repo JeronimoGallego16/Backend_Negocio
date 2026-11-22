@@ -63,6 +63,7 @@ describe('SportsController team-sport relationships', () => {
     }).compile();
 
     app = module.createNestApplication();
+    app.setGlobalPrefix('api');
     await app.init();
   });
 
@@ -70,9 +71,9 @@ describe('SportsController team-sport relationships', () => {
     await app.close();
   });
 
-  it('returns team and sport IDs from GET /sports when assignments exist', async () => {
+  it('returns team and sport IDs from GET /api/sports when assignments exist', async () => {
     const response = await request(app.getHttpServer())
-      .get('/sports')
+      .get('/api/sports')
       .expect(200);
 
     expect(response.body[0].teamSports).toEqual([
@@ -88,14 +89,14 @@ describe('SportsController team-sport relationships', () => {
 
   it('loads assignment relations when reading and updating a sport', async () => {
     const readResponse = await request(app.getHttpServer())
-      .get('/sports/5')
+      .get('/api/sports/5')
       .expect(200);
     expect(readResponse.body.teamSports).toEqual([
       { teamSportId: 8, teamId: 12, sportId: 5 },
     ]);
 
     const updateResponse = await request(app.getHttpServer())
-      .patch('/sports/5')
+      .patch('/api/sports/5')
       .send({ name: 'Updated Basketball' })
       .expect(200);
     expect(updateResponse.body.teamSports).toEqual([
