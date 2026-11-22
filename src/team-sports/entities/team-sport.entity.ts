@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Sport } from '../../sports/entities/sport.entity';
 import { Team } from '../../teams/entities/team.entity';
 
@@ -23,7 +24,7 @@ export class TeamSport {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'team_id', referencedColumnName: 'teamId' })
-  team!: Team;
+  team!: Relation<Team>;
 
   @ManyToOne(() => Sport, (sport) => sport.teamSports, {
     cascade: false,
@@ -31,5 +32,5 @@ export class TeamSport {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'sport_id', referencedColumnName: 'sportId' })
-  sport!: Sport;
+  sport!: Relation<Sport>;
 }

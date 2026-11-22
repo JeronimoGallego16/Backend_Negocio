@@ -74,7 +74,7 @@ export class Match {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'home_team_id', referencedColumnName: 'teamId' })
-  homeTeam!: Team;
+  homeTeam!: Relation<Team>;
 
   @ManyToOne(() => Team, (team) => team.awayMatches, {
     cascade: false,
@@ -82,5 +82,5 @@ export class Match {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'away_team_id', referencedColumnName: 'teamId' })
-  awayTeam!: Team;
+  awayTeam!: Relation<Team>;
 }

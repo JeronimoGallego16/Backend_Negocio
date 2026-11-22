@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 
 /**
  * Database entity representing a team's registration in a tournament.
@@ -27,7 +28,7 @@ export class Registration {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'tournament_id' })
-  tournament!: Tournament;
+  tournament!: Relation<Tournament>;
 
   @ManyToOne(() => Team, (team) => team.registrations, {
     cascade: false,
@@ -35,5 +36,5 @@ export class Registration {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'team_id' })
-  team!: Team;
+  team!: Relation<Team>;
 }

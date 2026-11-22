@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationErrors } from '../common/errors/application-error';
 import { PlayersService } from '../players/players.service';
+import { PlayerTeamsService } from '../player-teams/player-teams.service';
 import { UpdateAnnotationDto } from './dto/update-annotation.dto';
 import { AnnotationDto } from './dto/annotation.dto';
 import { AnnotationResponseDto } from './dto/annotation-response.dto';
@@ -19,6 +20,7 @@ export class AnnotationsService {
     private readonly annotationsRepository: AnnotationsRepository,
     private readonly matchesService: MatchesService,
     private readonly playersService: PlayersService,
+    private readonly playerTeamsService: PlayerTeamsService,
     private readonly annotationMapper: AnnotationMapper,
   ) {}
 
@@ -36,8 +38,32 @@ export class AnnotationsService {
       );
     }
 
-    await this.matchesService.findOne(matchId);
+    const match = await this.matchesService.findOne(matchId);
+    if (match.state.trim().toUpperCase() !== 'ACTIVE') {
+      throw ApplicationErrors.conflict(
+        'Annotations can only be created while the match is active',
+      );
+    }
+
     await this.playersService.findOne(dto.playerId);
+    const currentDate = new Date().toISOString().slice(0, 10);
+    const belongsToMatchTeam = await Promise.all([
+      this.playerTeamsService.belongsToTeam(
+        dto.playerId,
+        match.homeTeamId,
+        currentDate,
+      ),
+      this.playerTeamsService.belongsToTeam(
+        dto.playerId,
+        match.awayTeamId,
+        currentDate,
+      ),
+    ]);
+    if (!belongsToMatchTeam.some(Boolean)) {
+      throw ApplicationErrors.invalidInput(
+        'The player must belong to one of the match teams',
+      );
+    }
 
     const saved = await this.annotationRepository.save(
       this.annotationMapper.toEntity(matchId, dto),
