@@ -6,6 +6,7 @@ import { Match } from '../matches/entities/match.entity';
 import { GroupPhase } from '../phases/entities/group-phase.entity';
 import { Tournament } from '../tournaments/entities/tournament.entity';
 import { Team } from '../teams/entities/team.entity';
+import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { AssignTeamDto } from './dto/assign-team.dto';
 import { CompetitionGroupDto } from './dto/competition-group.dto';
 import { CompetitionGroupResponseDto } from './dto/competition-group-response.dto';
@@ -25,6 +26,7 @@ export class GroupsService {
    * @param teamRepository - Team repository.
    * @param tournamentRepository - Tournament repository.
    * @param matchRepository - Match repository.
+   * @param teamSportRepository - Team-sport assignment repository.
    * @param groupMapper - Competition group mapper.
    */
   constructor(
@@ -38,6 +40,8 @@ export class GroupsService {
     private readonly tournamentRepository: Repository<Tournament>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
+    @InjectRepository(TeamSport)
+    private readonly teamSportRepository: Repository<TeamSport>,
     private readonly groupMapper: CompetitionGroupMapper,
   ) {}
 
@@ -196,7 +200,13 @@ export class GroupsService {
     if (!team) {
       throw ApplicationErrors.notFound(`Team with id ${dto.teamId} not found`);
     }
-    if (team.sportId !== tournament.sport.sportId) {
+    const teamSport = await this.teamSportRepository.findOne({
+      where: {
+        team: { teamId: team.teamId },
+        sport: { sportId: tournament.sport.sportId },
+      },
+    });
+    if (!teamSport) {
       throw ApplicationErrors.invalidInput(
         'The team and tournament must belong to the same sport',
       );
