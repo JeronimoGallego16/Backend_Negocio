@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { PlayerTeam } from '../entities/player-team.entity';
 
 @Injectable()
@@ -16,6 +16,14 @@ export class PlayerTeamsRepository {
       relations: { player: true, team: true },
       order: { startDate: 'DESC' },
     });
+  }
+
+  async deleteScheduled(playerTeamId: number, today: string): Promise<boolean> {
+    const result = await this.playerTeamRepository.delete({
+      playerTeamId,
+      startDate: MoreThan(today),
+    });
+    return result.affected === 1;
   }
 
   findByTeam(teamId: number, onDate?: string): Promise<PlayerTeam[]> {
@@ -57,11 +65,23 @@ export class PlayerTeamsRepository {
     return query.getMany();
   }
 
-  findOpenLink(playerId: number, teamId: number): Promise<PlayerTeam | null> {
-    return this.playerTeamRepository.findOne({
-      where: { playerId, teamId, endDate: IsNull() },
-      relations: { player: true, team: true },
-    });
+  findCurrentLink(
+    playerId: number,
+    teamId: number,
+    onDate: string,
+  ): Promise<PlayerTeam | null> {
+    return this.playerTeamRepository
+      .createQueryBuilder('playerTeam')
+      .leftJoinAndSelect('playerTeam.player', 'player')
+      .leftJoinAndSelect('playerTeam.team', 'team')
+      .where('playerTeam.playerId = :playerId', { playerId })
+      .andWhere('playerTeam.teamId = :teamId', { teamId })
+      .andWhere('playerTeam.startDate <= :onDate', { onDate })
+      .andWhere(
+        '(playerTeam.endDate IS NULL OR playerTeam.endDate > :onDate)',
+        { onDate },
+      )
+      .getOne();
   }
 
   async belongsToTeam(

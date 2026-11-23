@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -32,6 +35,14 @@ export class PlayerTeamsController {
     @Body() dto: RetirePlayerTeamDto,
   ): Promise<PlayerTeamResponseDto> {
     return this.playerTeamsService.retire(teamId, playerId, dto);
+  }
+
+  @Delete('player-teams/:playerTeamId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteScheduled(
+    @Param('playerTeamId', ParseIntPipe) playerTeamId: number,
+  ): Promise<void> {
+    return this.playerTeamsService.deleteScheduled(playerTeamId);
   }
 
   @Get('teams/:teamId/players')

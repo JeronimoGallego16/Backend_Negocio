@@ -88,13 +88,15 @@ export class PlayerTeamsService {
       );
     }
 
-    const assignment = await this.playerTeamsRepository.findOpenLink(
+    const today = new Date().toISOString().slice(0, 10);
+    const assignment = await this.playerTeamsRepository.findCurrentLink(
       playerId,
       teamId,
+      today,
     );
     if (!assignment) {
       throw ApplicationErrors.notFound(
-        'The player has no open assignment with this team',
+        'The player has no current assignment with this team',
       );
     }
 
@@ -104,9 +106,22 @@ export class PlayerTeamsService {
       );
     }
 
+    if (assignment.endDate !== null && dto.endDate > assignment.endDate) {
+      throw ApplicationErrors.invalidInput(
+        'endDate cannot be later than the current endDate',
+      );
+    }
+
     assignment.endDate = dto.endDate;
     const saved = await this.playerTeamRepository.save(assignment);
     return this.playerTeamMapper.toResponseDto(saved);
+  }
+
+  async deleteScheduled(playerTeamId: number): Promise<void> {
+    const today = new Date().toISOString().slice(0, 10);
+    if (!(await this.playerTeamsRepository.deleteScheduled(playerTeamId, today))) {
+      throw ApplicationErrors.notFound('Scheduled assignment not found');
+    }
   }
 
   async findByPlayer(playerId: number): Promise<PlayerTeamResponseDto[]> {

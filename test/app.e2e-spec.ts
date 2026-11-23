@@ -60,6 +60,7 @@ describe('AppController (e2e)', () => {
       () => request(app.getHttpServer()).post('/api/teams/1/players'),
       () => request(app.getHttpServer()).get('/api/teams/1/players'),
       () => request(app.getHttpServer()).patch('/api/teams/1/players/1/retirement'),
+      () => request(app.getHttpServer()).delete('/api/player-teams/1'),
       () => request(app.getHttpServer()).get('/api/players/1/teams'),
       () => request(app.getHttpServer()).post('/api/matches/1/annotations'),
       () => request(app.getHttpServer()).get('/api/matches/1/annotations'),

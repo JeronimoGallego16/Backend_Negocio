@@ -27,11 +27,15 @@ depends on the independent skills module to validate skill references.
 | GET                | `/api/skills/:skillId/players`                    | List players assigned to a skill           |
 | POST, GET          | `/api/teams/:teamId/players`                      | Assign or list a team's players            |
 | PATCH              | `/api/teams/:teamId/players/:playerId/retirement` | End an active membership                   |
+| DELETE             | `/api/player-teams/:playerTeamId`                 | Delete a future membership                 |
 | GET                | `/api/players/:playerId/teams`                    | Read a player's team history               |
 | POST, GET          | `/api/matches/:matchId/annotations`               | Create or list match annotations           |
 | PATCH, DELETE      | `/api/annotations/:annotationId`                  | Update or void an annotation               |
 
 All routes remain protected by the application's global security guard.
+The DELETE route only removes memberships starting after the current UTC date;
+current and past memberships cannot be deleted. Canceling a future membership
+does not change the end date of any earlier membership.
 
 ## Database migration
 
