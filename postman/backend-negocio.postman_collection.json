@@ -1,0 +1,492 @@
+{
+  "info": {
+    "_postman_id": "67867f1e-1ec7-4e20-a101-854f5fa6e89a",
+    "name": "Backend Negocio - API completa",
+    "description": "Colección de endpoints del backend. Los nombres de las carpetas coinciden exactamente con los directorios de dominio en src. Configura Authorization manualmente en Postman (Bearer Token). baseUrl ya incluye el prefijo global /api. Los POST guardan IDs de respuesta en variables de colección. Las solicitudes DELETE y la finalización del partido son destructivas o dependen del orden; ejecútalas manualmente después de probar las operaciones relacionadas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "runSuffix", "value": "postman-test", "type": "string" },
+    { "key": "sportId", "value": "", "type": "string" },
+    { "key": "teamAId", "value": "", "type": "string" },
+    { "key": "teamBId", "value": "", "type": "string" },
+    { "key": "teamSportAId", "value": "", "type": "string" },
+    { "key": "teamSportBId", "value": "", "type": "string" },
+    { "key": "tournamentId", "value": "", "type": "string" },
+    { "key": "groupPhaseId", "value": "", "type": "string" },
+    { "key": "finalPhaseId", "value": "", "type": "string" },
+    { "key": "groupId", "value": "", "type": "string" },
+    { "key": "matchId", "value": "", "type": "string" },
+    { "key": "registrationId", "value": "", "type": "string" },
+    { "key": "playerId", "value": "", "type": "string" },
+    { "key": "scheduledPlayerId", "value": "", "type": "string" },
+    { "key": "skillId", "value": "", "type": "string" },
+    { "key": "playerTeamId", "value": "", "type": "string" },
+    { "key": "scheduledPlayerTeamId", "value": "", "type": "string" },
+    { "key": "annotationId", "value": "", "type": "string" },
+    { "key": "today", "value": "", "type": "string" },
+    { "key": "futureDate", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "GET - Ruta raíz",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/"
+      }
+    },
+    {
+      "name": "sports",
+      "item": [
+        {
+          "name": "POST - Crear deporte",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.collectionVariables.set('runSuffix', Date.now().toString());"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('sportId', pm.response.json().sportId);"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Deporte {{runSuffix}}\",\n  \"description\": \"Deporte creado para probar la API\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/sports"
+          }
+        },
+        { "name": "GET - Listar deportes", "request": { "method": "GET", "url": "{{baseUrl}}/sports" } },
+        { "name": "GET - Consultar deporte", "request": { "method": "GET", "url": "{{baseUrl}}/sports/{{sportId}}" } },
+        {
+          "name": "PATCH - Actualizar deporte",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Descripción actualizada desde Postman\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/sports/{{sportId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar deporte (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/sports/{{sportId}}" } }
+      ]
+    },
+    {
+      "name": "teams",
+      "item": [
+        {
+          "name": "POST - Crear equipo A",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('teamAId', pm.response.json().teamId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Equipo A {{runSuffix}}\",\n  \"category\": \"Mayores\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams"
+          }
+        },
+        {
+          "name": "POST - Crear equipo B",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('teamBId', pm.response.json().teamId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Equipo B {{runSuffix}}\",\n  \"category\": \"Mayores\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams"
+          }
+        },
+        { "name": "GET - Listar equipos", "request": { "method": "GET", "url": "{{baseUrl}}/teams" } },
+        { "name": "GET - Consultar equipo A", "request": { "method": "GET", "url": "{{baseUrl}}/teams/{{teamAId}}" } },
+        {
+          "name": "PATCH - Actualizar equipo A",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Equipo A actualizado {{runSuffix}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams/{{teamAId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar equipo A (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/teams/{{teamAId}}" } },
+        { "name": "DELETE - Eliminar equipo B (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/teams/{{teamBId}}" } }
+      ]
+    },
+    {
+      "name": "team-sports",
+      "item": [
+        {
+          "name": "POST - Asociar deporte al equipo A",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('teamSportAId', pm.response.json().teamSportId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"teamId\": {{teamAId}},\n  \"sportId\": {{sportId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/team-sports"
+          }
+        },
+        {
+          "name": "POST - Asociar deporte al equipo B",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('teamSportBId', pm.response.json().teamSportId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"teamId\": {{teamBId}},\n  \"sportId\": {{sportId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/team-sports"
+          }
+        },
+        { "name": "GET - Listar asociaciones", "request": { "method": "GET", "url": "{{baseUrl}}/team-sports" } },
+        { "name": "GET - Consultar asociación A", "request": { "method": "GET", "url": "{{baseUrl}}/team-sports/{{teamSportAId}}" } },
+        {
+          "name": "PATCH - Actualizar asociación A",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"teamId\": {{teamAId}},\n  \"sportId\": {{sportId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/team-sports/{{teamSportAId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar asociación A (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/team-sports/{{teamSportAId}}" } },
+        { "name": "DELETE - Eliminar asociación B (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/team-sports/{{teamSportBId}}" } }
+      ]
+    },
+    {
+      "name": "tournaments",
+      "item": [
+        {
+          "name": "POST - Crear torneo abierto",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('tournamentId', pm.response.json().tournamentId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Torneo {{runSuffix}}\",\n  \"modality\": \"Fútbol\",\n  \"startDate\": \"2030-06-01\",\n  \"endDate\": \"2030-06-30\",\n  \"registrationEndDate\": \"2030-05-25\",\n  \"status\": \"OPEN\",\n  \"capacity\": 16,\n  \"sportId\": {{sportId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/tournaments"
+          }
+        },
+        { "name": "GET - Listar torneos", "request": { "method": "GET", "url": "{{baseUrl}}/tournaments" } },
+        { "name": "GET - Consultar torneo", "request": { "method": "GET", "url": "{{baseUrl}}/tournaments/{{tournamentId}}" } },
+        { "name": "GET - Consultar desarrollo del torneo", "request": { "method": "GET", "url": "{{baseUrl}}/tournaments/{{tournamentId}}/development" } },
+        {
+          "name": "PATCH - Actualizar torneo",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"modality\": \"Fútbol 11\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar torneo (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/tournaments/{{tournamentId}}" } }
+      ]
+    },
+    {
+      "name": "phases",
+      "item": [
+        {
+          "name": "POST - Crear fase de grupos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('groupPhaseId', pm.response.json().phaseId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fase de grupos\",\n  \"order\": 1,\n  \"tournamentId\": {{tournamentId}},\n  \"type\": \"GROUP\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/phases"
+          }
+        },
+        {
+          "name": "POST - Crear fase final",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('finalPhaseId', pm.response.json().phaseId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fase final\",\n  \"order\": 2,\n  \"tournamentId\": {{tournamentId}},\n  \"type\": \"FINAL\",\n  \"isThirdPlace\": true\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/phases"
+          }
+        },
+        { "name": "GET - Listar fases del torneo", "request": { "method": "GET", "url": "{{baseUrl}}/phases?tournamentId={{tournamentId}}" } },
+        { "name": "GET - Consultar fase de grupos", "request": { "method": "GET", "url": "{{baseUrl}}/phases/{{groupPhaseId}}" } },
+        {
+          "name": "PATCH - Actualizar fase de grupos",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fase de grupos actualizada\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/phases/{{groupPhaseId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar fase final (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/phases/{{finalPhaseId}}" } },
+        { "name": "DELETE - Eliminar fase de grupos (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/phases/{{groupPhaseId}}" } }
+      ]
+    },
+    {
+      "name": "groups",
+      "item": [
+        {
+          "name": "POST - Crear grupo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('groupId', pm.response.json().groupId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"letterOrNumber\": \"A\",\n  \"maxTeams\": 4\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/phases/{{groupPhaseId}}/groups"
+          }
+        },
+        { "name": "GET - Listar grupos de una fase", "request": { "method": "GET", "url": "{{baseUrl}}/phases/{{groupPhaseId}}/groups" } },
+        { "name": "GET - Consultar grupo", "request": { "method": "GET", "url": "{{baseUrl}}/groups/{{groupId}}" } },
+        {
+          "name": "PATCH - Actualizar grupo",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"maxTeams\": 6\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/groups/{{groupId}}"
+          }
+        },
+        {
+          "name": "POST - Asignar equipo A",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"teamId\": {{teamAId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/groups/{{groupId}}/teams"
+          }
+        },
+        {
+          "name": "POST - Asignar equipo B",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"teamId\": {{teamBId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/groups/{{groupId}}/teams"
+          }
+        },
+        { "name": "GET - Listar equipos del grupo", "request": { "method": "GET", "url": "{{baseUrl}}/groups/{{groupId}}/teams" } },
+        { "name": "DELETE - Retirar equipo A (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamAId}}" } },
+        { "name": "DELETE - Retirar equipo B (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamBId}}" } },
+        { "name": "DELETE - Eliminar grupo vacío (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/groups/{{groupId}}" } }
+      ]
+    },
+    {
+      "name": "matches",
+      "item": [
+        {
+          "name": "POST - Crear partido activo para anotar",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('matchId', pm.response.json().matchId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"duration\": \"90 minutos\",\n  \"state\": \"ACTIVE\",\n  \"homeTeamId\": {{teamAId}},\n  \"awayTeamId\": {{teamBId}},\n  \"phaseId\": {{groupPhaseId}},\n  \"isThirdPlace\": false\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/matches"
+          }
+        },
+        { "name": "GET - Listar partidos", "request": { "method": "GET", "url": "{{baseUrl}}/matches" } },
+        { "name": "GET - Consultar partido", "request": { "method": "GET", "url": "{{baseUrl}}/matches/{{matchId}}" } },
+        {
+          "name": "PATCH - Actualizar partido",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"state\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/matches/{{matchId}}"
+          }
+        },
+        {
+          "name": "PATCH - Registrar resultado (ejecutar después de annotations)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1,\n  \"state\": \"FINALIZADO\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/matches/{{matchId}}/result"
+          }
+        },
+        { "name": "DELETE - Eliminar partido (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/matches/{{matchId}}" } }
+      ]
+    },
+    {
+      "name": "registrations",
+      "item": [
+        {
+          "name": "POST - Inscribir equipo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('registrationId', pm.response.json().registrationId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tournamentId\": {{tournamentId}},\n  \"teamId\": {{teamAId}}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/registrations"
+          }
+        },
+        { "name": "GET - Listar inscripciones", "request": { "method": "GET", "url": "{{baseUrl}}/registrations" } },
+        { "name": "GET - Filtrar por torneo", "request": { "method": "GET", "url": "{{baseUrl}}/registrations?tournamentId={{tournamentId}}" } },
+        { "name": "GET - Filtrar por equipo", "request": { "method": "GET", "url": "{{baseUrl}}/registrations?teamId={{teamAId}}" } },
+        { "name": "DELETE - Retirar inscripción (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/registrations/{{registrationId}}" } }
+      ]
+    },
+    {
+      "name": "players",
+      "item": [
+        {
+          "name": "POST - Crear jugador",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('playerId', pm.response.json().playerId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Jugador\",\n  \"lastName\": \"Postman {{runSuffix}}\",\n  \"birthDate\": \"2000-01-15\",\n  \"gender\": \"OTHER\",\n  \"email\": \"jugador.{{runSuffix}}@example.com\",\n  \"identification\": \"PM{{runSuffix}}\",\n  \"active\": true\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/players"
+          }
+        },
+        {
+          "name": "POST - Crear segundo jugador",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('scheduledPlayerId', pm.response.json().playerId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Jugador Dos\",\n  \"lastName\": \"Postman {{runSuffix}}\",\n  \"birthDate\": \"2001-02-20\",\n  \"gender\": \"OTHER\",\n  \"email\": \"jugador2.{{runSuffix}}@example.com\",\n  \"identification\": \"PM2{{runSuffix}}\",\n  \"active\": true\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/players"
+          }
+        },
+        { "name": "GET - Listar jugadores", "request": { "method": "GET", "url": "{{baseUrl}}/players" } },
+        { "name": "GET - Consultar jugador", "request": { "method": "GET", "url": "{{baseUrl}}/players/{{playerId}}" } },
+        { "name": "GET - Consultar perfil del jugador", "request": { "method": "GET", "url": "{{baseUrl}}/players/{{playerId}}/profile" } },
+        {
+          "name": "PATCH - Actualizar jugador",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"active\": true\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/players/{{playerId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar jugador (puede estar bloqueado por historial)", "request": { "method": "DELETE", "url": "{{baseUrl}}/players/{{playerId}}" } },
+        { "name": "DELETE - Eliminar segundo jugador (puede estar bloqueado por historial)", "request": { "method": "DELETE", "url": "{{baseUrl}}/players/{{scheduledPlayerId}}" } }
+      ]
+    },
+    {
+      "name": "skills",
+      "item": [
+        {
+          "name": "POST - Crear habilidad",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('skillId', pm.response.json().skillId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Resistencia {{runSuffix}}\",\n  \"description\": \"Habilidad creada para probar la API\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/skills"
+          }
+        },
+        { "name": "GET - Listar habilidades", "request": { "method": "GET", "url": "{{baseUrl}}/skills" } },
+        { "name": "GET - Consultar habilidad", "request": { "method": "GET", "url": "{{baseUrl}}/skills/{{skillId}}" } },
+        {
+          "name": "PATCH - Actualizar habilidad",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Descripción modificada desde Postman\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/skills/{{skillId}}"
+          }
+        },
+        { "name": "DELETE - Eliminar habilidad sin jugadores asociados (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/skills/{{skillId}}" } }
+      ]
+    },
+    {
+      "name": "player-skills",
+      "item": [
+        {
+          "name": "POST - Asignar habilidad al jugador",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"skillId\": {{skillId}},\n  \"level\": 4,\n  \"observations\": \"Asignación de prueba\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/players/{{playerId}}/skills"
+          }
+        },
+        { "name": "GET - Listar habilidades del jugador", "request": { "method": "GET", "url": "{{baseUrl}}/players/{{playerId}}/skills" } },
+        { "name": "GET - Listar jugadores con la habilidad", "request": { "method": "GET", "url": "{{baseUrl}}/skills/{{skillId}}/players" } },
+        {
+          "name": "PATCH - Actualizar habilidad del jugador",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"level\": 5,\n  \"observations\": \"Nivel actualizado desde Postman\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/players/{{playerId}}/skills/{{skillId}}"
+          }
+        },
+        { "name": "DELETE - Quitar habilidad del jugador (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/players/{{playerId}}/skills/{{skillId}}" } }
+      ]
+    },
+    {
+      "name": "player-teams",
+      "item": [
+        {
+          "name": "POST - Vincular jugador principal a equipo A",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('today', new Date().toISOString().slice(0, 10));"] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('playerTeamId', pm.response.json().playerTeamId);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"playerId\": {{playerId}},\n  \"startDate\": \"{{today}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams/{{teamAId}}/players"
+          }
+        },
+        { "name": "GET - Jugadores actuales del equipo A", "request": { "method": "GET", "url": "{{baseUrl}}/teams/{{teamAId}}/players?current=true" } },
+        { "name": "GET - Equipos del jugador", "request": { "method": "GET", "url": "{{baseUrl}}/players/{{playerId}}/teams" } },
+        {
+          "name": "PATCH - Retirar jugador del equipo (ejecutar después de annotations)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endDate\": \"{{today}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams/{{teamAId}}/players/{{playerId}}/retirement"
+          }
+        },
+        {
+          "name": "POST - Crear asignación programada",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["const date = new Date();", "date.setDate(date.getDate() + 30);", "pm.collectionVariables.set('futureDate', date.toISOString().slice(0, 10));"] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('scheduledPlayerTeamId', pm.response.json().playerTeamId);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"playerId\": {{scheduledPlayerId}},\n  \"startDate\": \"{{futureDate}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/teams/{{teamBId}}/players"
+          }
+        },
+        { "name": "DELETE - Eliminar asignación programada (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/player-teams/{{scheduledPlayerTeamId}}" } }
+      ]
+    },
+    {
+      "name": "annotations",
+      "item": [
+        {
+          "name": "POST - Crear anotación",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) pm.collectionVariables.set('annotationId', pm.response.json().annotationId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"playerId\": {{playerId}},\n  \"minute\": 15,\n  \"type\": \"GOAL\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/matches/{{matchId}}/annotations"
+          }
+        },
+        { "name": "GET - Listar anotaciones del partido", "request": { "method": "GET", "url": "{{baseUrl}}/matches/{{matchId}}/annotations" } },
+        {
+          "name": "PATCH - Actualizar anotación",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minute\": 16,\n  \"type\": \"GOAL\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/annotations/{{annotationId}}"
+          }
+        },
+        { "name": "DELETE - Anular anotación (manual)", "request": { "method": "DELETE", "url": "{{baseUrl}}/annotations/{{annotationId}}" } }
+      ]
+    }
+  ]
+}
