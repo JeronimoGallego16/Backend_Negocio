@@ -41,7 +41,7 @@ export class Team {
   registrations?: Registration[];
 
   @Column({ name: 'group_id', type: 'int', nullable: true })
-  groupId?: number;
+  groupId?: number | null;
 
   @ManyToOne(() => CompetitionGroup, (group) => group.teams, {
     cascade: false,
@@ -49,7 +49,7 @@ export class Team {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'group_id' })
-  group?: CompetitionGroup;
+  group?: CompetitionGroup | null;
   
   @OneToMany(() => Match, (match) => match.homeTeam, { cascade: false })
   homeMatches?: Match[];

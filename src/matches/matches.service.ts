@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationErrors } from '../common/errors/application-error';
+import { Annotation } from '../annotations/entities/annotation.entity';
 import { Phase } from '../phases/entities/phase.entity';
 import { Team } from '../teams/entities/team.entity';
 import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { MatchDto } from './dto/match.dto';
+import { MatchResultDto } from './dto/match-result.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { Match } from './entities/match.entity';
 import { MatchMapper } from './mappers/match.mapper';
@@ -37,6 +39,8 @@ export class MatchesService {
     private readonly teamSportRepository: Repository<TeamSport>,
     @InjectRepository(Tournament)
     private readonly tournamentRepository: Repository<Tournament>,
+    @InjectRepository(Annotation)
+    private readonly annotationRepository: Repository<Annotation>,
     private readonly matchMapper: MatchMapper,
   ) {}
 
@@ -71,6 +75,7 @@ export class MatchesService {
     match.awayTeam = awayTeam;
     match.phase = phase;
     match.phaseId = dto.phaseId;
+    this.assertFinishedMatchHasScores(match.state, match.homeScore, match.awayScore);
     await this.assertTeamsBelongToTournament(
       phase,
       homeTeam.teamId,
@@ -141,6 +146,11 @@ export class MatchesService {
         : await this.findPhase(phaseId);
     merged.phase = phase;
     merged.phaseId = phase.phaseId;
+    this.assertFinishedMatchHasScores(
+      merged.state,
+      merged.homeScore,
+      merged.awayScore,
+    );
     await this.assertTeamsBelongToTournament(
       phase,
       merged.homeTeam.teamId,
@@ -153,15 +163,60 @@ export class MatchesService {
   }
 
   /**
+   * Registers a final score and transitions the match to FINISHED.
+   *
+   * @param id - Match identifier.
+   * @param dto - Final home and away scores.
+   * @returns The finished match.
+   */
+  async registerResult(
+    id: number,
+    dto: MatchResultDto,
+  ): Promise<MatchResponseDto> {
+    if (
+      !Number.isInteger(dto.homeScore) ||
+      dto.homeScore < 0 ||
+      !Number.isInteger(dto.awayScore) ||
+      dto.awayScore < 0
+    ) {
+      throw ApplicationErrors.invalidInput(
+        'homeScore and awayScore must be non-negative integers',
+      );
+    }
+
+    const match = await this.findMatch(id);
+    match.homeScore = dto.homeScore;
+    match.awayScore = dto.awayScore;
+    match.state = 'FINISHED';
+    match.resultRegistered = true;
+
+    return this.matchMapper.toResponseDto(await this.matchRepository.save(match));
+  }
+
+  /**
    * Deletes a match.
    *
    * @param id - Match identifier.
    * @returns A confirmation message.
    */
   async remove(id: number): Promise<{ message: string }> {
-    const match = await this.findMatch(id);
-    await this.matchRepository.remove(match);
-    return { message: `Match #${id} deleted successfully` };
+    return this.annotationRepository.manager.transaction(async (manager) => {
+      const matchRepository = manager.getRepository(Match);
+      const match = await matchRepository.findOne({
+        where: { matchId: id },
+        relations: { homeTeam: true, awayTeam: true, phase: true },
+      });
+      if (!match) {
+        throw ApplicationErrors.notFound(`Match with id ${id} not found`);
+      }
+
+      await manager.delete(Annotation, { matchId: id });
+      await matchRepository.remove(match);
+
+      return {
+        message: `Match #${id} and its annotations were permanently deleted`,
+      };
+    });
   }
 
   /**
@@ -270,6 +325,32 @@ export class MatchesService {
     if (homeTeamId === awayTeamId) {
       throw ApplicationErrors.invalidInput(
         'homeTeamId and awayTeamId must identify different teams',
+      );
+    }
+  }
+
+  /**
+   * Requires both scores before a match can be marked as finished.
+   *
+   * @param state - Match state after the requested operation.
+   * @param homeScore - Home team's score.
+   * @param awayScore - Away team's score.
+   * @returns Nothing when the match has a complete result.
+   */
+  private assertFinishedMatchHasScores(
+    state: string,
+    homeScore: number | null | undefined,
+    awayScore: number | null | undefined,
+  ): void {
+    if (
+      state?.trim().toUpperCase() === 'FINISHED' &&
+      (homeScore === undefined ||
+        homeScore === null ||
+        awayScore === undefined ||
+        awayScore === null)
+    ) {
+      throw ApplicationErrors.invalidInput(
+        'A finished match must have both homeScore and awayScore',
       );
     }
   }

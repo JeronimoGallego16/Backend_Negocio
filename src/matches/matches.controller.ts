@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { MatchDto } from './dto/match.dto';
+import { MatchResultDto } from './dto/match-result.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { MatchesService } from './matches.service';
 
@@ -94,9 +95,9 @@ export class MatchesController {
   @Patch(':id/result')
   registerResult(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: MatchDto,
+    @Body() dto: MatchResultDto,
   ): Promise<MatchResponseDto> {
-    return this.matchesService.update(id, dto);
+    return this.matchesService.registerResult(id, dto);
   }
 
 }

@@ -149,8 +149,10 @@ export class TournamentsService {
           homeScore: match.homeScore,
           awayScore: match.awayScore,
           resultRegistered:
-            match.resultRegistered ||
-            (match.homeScore !== undefined && match.awayScore !== undefined),
+            match.homeScore !== undefined &&
+            match.homeScore !== null &&
+            match.awayScore !== undefined &&
+            match.awayScore !== null,
         });
       }
 
@@ -168,6 +170,7 @@ export class TournamentsService {
           groupPayload.push({
             groupId: group.groupId,
             name: group.letterOrNumber,
+            letterOrNumber: group.letterOrNumber,
             teams,
             standings,
           });
@@ -274,7 +277,8 @@ export class TournamentsService {
     matches: Match[],
   ): Array<Record<string, unknown>> {
     const rows = teams.map((team) => ({
-      team: { teamId: team.teamId, name: team.name },
+      teamId: team.teamId,
+      teamName: team.name,
       played: 0,
       won: 0,
       drawn: 0,
@@ -284,10 +288,11 @@ export class TournamentsService {
       goalDifference: 0,
       points: 0,
     }));
-    const byTeamId = new Map(rows.map((row) => [row.team.teamId, row]));
+    const byTeamId = new Map(rows.map((row) => [row.teamId, row]));
 
     for (const match of matches) {
       if (
+        match.state?.trim().toUpperCase() !== 'FINISHED' ||
         match.homeScore === undefined ||
         match.awayScore === undefined ||
         match.homeScore === null ||
@@ -331,7 +336,7 @@ export class TournamentsService {
           right.points - left.points ||
           right.goalDifference - left.goalDifference ||
           right.goalsFor - left.goalsFor ||
-          left.team.name.localeCompare(right.team.name),
+          left.teamName.localeCompare(right.teamName),
       );
   }
 

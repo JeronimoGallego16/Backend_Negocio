@@ -258,8 +258,8 @@ export class GroupsService {
     if (!team) {
       throw ApplicationErrors.notFound('Team assignment not found');
     }
-    team.group = undefined;
-    team.groupId = undefined;
+    team.group = null;
+    team.groupId = null;
     await this.teamRepository.save(team);
   }
 
