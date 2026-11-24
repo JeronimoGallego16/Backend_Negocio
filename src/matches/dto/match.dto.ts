@@ -30,15 +30,15 @@ export class MatchDto {
   @Min(1)
   phaseId?: number;
 
-  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @ValidateIf((_object, value: unknown) => value !== undefined && value !== null)
   @IsInt()
   @Min(1)
-  homeTeamId?: number;
+  homeTeamId?: number | null;
 
-  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @ValidateIf((_object, value: unknown) => value !== undefined && value !== null)
   @IsInt()
   @Min(1)
-  awayTeamId?: number;
+  awayTeamId?: number | null;
 
   @ValidateIf((_object, value: unknown) => value !== undefined)
   @IsInt()

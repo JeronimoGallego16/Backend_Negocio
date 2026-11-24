@@ -115,6 +115,41 @@ describe('AnnotationsService', () => {
     expect(save).not.toHaveBeenCalled();
   });
 
+  it('rejects annotations for final-round matches with pending team slots', async () => {
+    const save = jest.fn();
+    const matchesService = {
+      findOne: jest.fn().mockResolvedValue({
+        matchId: 9,
+        state: 'ACTIVE',
+        homeTeamId: null,
+        awayTeamId: 21,
+      }),
+    } as unknown as MatchesService;
+    const playersService = {
+      findOne: jest.fn(),
+    } as unknown as PlayersService;
+    const playerTeamsService = {
+      belongsToTeam: jest.fn(),
+    } as unknown as PlayerTeamsService;
+    const service = new AnnotationsService(
+      { save } as unknown as Repository<Annotation>,
+      {} as AnnotationsRepository,
+      matchesService,
+      playersService,
+      playerTeamsService,
+      new AnnotationMapper(),
+    );
+
+    await expect(
+      service.create(9, { playerId: 4, minute: 12, type: 'goal' }),
+    ).rejects.toMatchObject({
+      code: ApplicationErrorCode.CONFLICT,
+    });
+    expect(playersService.findOne).not.toHaveBeenCalled();
+    expect(playerTeamsService.belongsToTeam).not.toHaveBeenCalled();
+    expect(save).not.toHaveBeenCalled();
+  });
+
   it('rejects players who are not currently assigned to either match team', async () => {
     const save = jest.fn();
     const matchesService = {

@@ -26,8 +26,13 @@ export class MatchMapper {
       nextMatchId: dto.nextMatchId,
       isThirdPlace: dto.isThirdPlace ?? false,
       resultRegistered:
-        dto.homeScore !== undefined && dto.awayScore !== undefined,
+        dto.homeScore != null &&
+        dto.awayScore != null &&
+        dto.homeTeamId != null &&
+        dto.awayTeamId != null,
     });
+    if (dto.homeTeamId === null) entity.homeTeam = null;
+    if (dto.awayTeamId === null) entity.awayTeam = null;
     if (dto.phaseId !== undefined) {
       entity.phase = { phaseId: dto.phaseId } as Phase;
     }
@@ -54,9 +59,12 @@ export class MatchMapper {
     if (dto.isThirdPlace !== undefined) {
       entity.isThirdPlace = dto.isThirdPlace;
     }
-    if (entity.homeScore !== undefined && entity.awayScore !== undefined) {
-      entity.resultRegistered = true;
-    }
+    entity.resultRegistered = Boolean(
+      entity.homeScore != null &&
+        entity.awayScore != null &&
+        entity.homeTeam &&
+        entity.awayTeam,
+    );
     if (dto.phaseId !== undefined) {
       entity.phase = { phaseId: dto.phaseId } as Phase;
     }
@@ -75,15 +83,21 @@ export class MatchMapper {
       duration: entity.duration,
       state: entity.state,
       phaseId: entity.phase?.phaseId,
-      homeTeamId: entity.homeTeam.teamId,
-      awayTeamId: entity.awayTeam.teamId,
+      homeTeamId: entity.homeTeam?.teamId ?? null,
+      awayTeamId: entity.awayTeam?.teamId ?? null,
       homeScore: entity.homeScore,
       awayScore: entity.awayScore,
       roundName: entity.roundName,
       bracketPosition: entity.bracketPosition,
       nextMatchId: entity.nextMatchId,
       isThirdPlace: entity.isThirdPlace ?? false,
-      resultRegistered: entity.resultRegistered ?? false,
+      resultRegistered: Boolean(
+        entity.resultRegistered &&
+          entity.homeTeam &&
+          entity.awayTeam &&
+          entity.homeScore != null &&
+          entity.awayScore != null,
+      ),
     };
   }
 

@@ -37,4 +37,9 @@ export class PhaseDto {
   @IsOptional()
   @IsBoolean()
   isThirdPlace?: boolean;
+
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsInt()
+  @Min(1)
+  expectedMatchCount?: number;
 }

@@ -12,6 +12,7 @@ import { Match } from '../matches/entities/match.entity';
 import { CompetitionGroup } from '../groups/entities/competition-group.entity';
 import { Team } from '../teams/entities/team.entity';
 import { Phase } from '../phases/entities/phase.entity';
+import { FinalPhase } from '../phases/entities/final.entity';
 
 /**
  * Business logic for managing tournaments.
@@ -138,21 +139,29 @@ export class TournamentsService {
           bracketPosition: match.bracketPosition,
           nextMatchId: match.nextMatchId,
           isThirdPlace: match.isThirdPlace,
-          homeTeam: {
-            teamId: match.homeTeam.teamId,
-            name: match.homeTeam.name,
-          },
-          awayTeam: {
-            teamId: match.awayTeam.teamId,
-            name: match.awayTeam.name,
-          },
+          homeTeam: match.homeTeam
+            ? {
+                teamId: match.homeTeam.teamId,
+                name: match.homeTeam.name,
+              }
+            : null,
+          awayTeam: match.awayTeam
+            ? {
+                teamId: match.awayTeam.teamId,
+                name: match.awayTeam.name,
+              }
+            : null,
           homeScore: match.homeScore,
           awayScore: match.awayScore,
           resultRegistered:
             match.homeScore !== undefined &&
             match.homeScore !== null &&
             match.awayScore !== undefined &&
-            match.awayScore !== null,
+            match.awayScore !== null &&
+            match.homeTeam !== null &&
+            match.homeTeam !== undefined &&
+            match.awayTeam !== null &&
+            match.awayTeam !== undefined,
         });
       }
 
@@ -184,6 +193,8 @@ export class TournamentsService {
         type: (phase as unknown as { type?: string }).type ?? phase.constructor.name.replace('Phase', '').toUpperCase(),
         isThirdPlace:
           (phase as unknown as { isThirdPlace?: boolean }).isThirdPlace ?? false,
+        expectedMatchCount:
+          (phase as FinalPhase).expectedMatchCount ?? null,
         groups: groupPayload,
         matches: matchPayload,
         bracket:
@@ -300,6 +311,7 @@ export class TournamentsService {
       ) {
         continue;
       }
+      if (!match.homeTeam || !match.awayTeam) continue;
       const home = byTeamId.get(match.homeTeam.teamId);
       const away = byTeamId.get(match.awayTeam.teamId);
       if (!home || !away) continue;

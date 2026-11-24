@@ -22,6 +22,7 @@ export class PhaseMapper {
       entity.name = dto.name!;
       entity.order = dto.order!;
       entity.isThirdPlace = dto.isThirdPlace ?? false;
+      entity.expectedMatchCount = dto.expectedMatchCount!;
       entity.tournamentId = dto.tournamentId!;
       return entity;
     }
@@ -46,6 +47,9 @@ export class PhaseMapper {
     if (entity instanceof FinalPhase && dto.isThirdPlace !== undefined) {
       entity.isThirdPlace = dto.isThirdPlace;
     }
+    if (entity instanceof FinalPhase && dto.expectedMatchCount !== undefined) {
+      entity.expectedMatchCount = dto.expectedMatchCount;
+    }
     return entity;
   }
 
@@ -66,6 +70,8 @@ export class PhaseMapper {
     } else {
       response.type = 'FINAL';
       response.isThirdPlace = (entity as FinalPhase).isThirdPlace;
+      response.expectedMatchCount =
+        (entity as FinalPhase).expectedMatchCount ?? null;
     }
     return response;
   }

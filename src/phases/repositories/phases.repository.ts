@@ -80,6 +80,14 @@ export class PhasesRepository {
     );
   }
 
+  findMatchesByPhase(phaseId: number): Promise<Match[]> {
+    return this.matchRepository.find({
+      where: { phase: { phaseId } },
+      relations: { homeTeam: true, awayTeam: true },
+      order: { bracketPosition: 'ASC', matchId: 'ASC' },
+    });
+  }
+
   /**
    * Finds a competition group by identifier.
    *

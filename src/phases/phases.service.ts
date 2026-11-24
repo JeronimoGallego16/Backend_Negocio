@@ -62,6 +62,26 @@ export class PhasesService {
         'That phase order is already used in the tournament',
       );
     }
+    const existingPhases = await this.phaseRepository.find({
+      where: { tournamentId: dto.tournamentId },
+      order: { order: 'ASC' },
+    });
+    this.assertConsecutiveOrders(existingPhases);
+    const nextOrder = existingPhases.length + 1;
+    if (dto.order !== nextOrder) {
+      throw ApplicationErrors.invalidInput(
+        `Create phases in order. The next available order is ${nextOrder}`,
+      );
+    }
+    this.assertPhaseFields(dto);
+    if (dto.type === 'FINAL') {
+      this.assertFinalPhaseChain(
+        dto.order,
+        dto.expectedMatchCount ?? null,
+        dto.isThirdPlace ?? false,
+        existingPhases,
+      );
+    }
     const phase = this.phaseMapper.toEntity(dto);
     phase.tournamentId = tournament.tournamentId;
     return this.phaseMapper.toResponseDto(
@@ -132,8 +152,35 @@ export class PhasesService {
         'That phase order is already used in the tournament',
       );
     }
+    this.assertPhaseFields(dto, phase);
+    const updated = this.phaseMapper.mergeEntity(phase, dto);
+    const phases = await this.phaseRepository.find({
+      where: { tournamentId: phase.tournamentId },
+      order: { order: 'ASC' },
+    });
+    const otherPhases = phases.filter((item) => item.phaseId !== phaseId);
+    if (dto.order !== undefined) {
+      this.assertConsecutiveOrders([...otherPhases, updated]);
+    }
+    if (updated instanceof FinalPhase) {
+      this.assertFinalPhaseChain(
+        updated.order,
+        updated.expectedMatchCount ?? null,
+        updated.isThirdPlace,
+        otherPhases,
+      );
+      if (
+        dto.expectedMatchCount !== undefined ||
+        dto.isThirdPlace !== undefined
+      ) {
+        this.assertExistingMatchesFitPhase(
+          updated,
+          await this.phasesRepository.findMatchesByPhase(phaseId),
+        );
+      }
+    }
     return this.phaseMapper.toResponseDto(
-      await this.phaseRepository.save(this.phaseMapper.mergeEntity(phase, dto)),
+      await this.phaseRepository.save(updated),
     );
   }
 
@@ -147,6 +194,14 @@ export class PhasesService {
     const phase = await this.findPhase(phaseId);
     if (await this.phasesRepository.hasMatches(phaseId)) {
       throw ApplicationErrors.conflict('A phase with matches cannot be deleted');
+    }
+    const laterPhases = await this.phaseRepository.find({
+      where: { tournamentId: phase.tournamentId },
+    });
+    if (laterPhases.some((candidate) => candidate.order > phase.order)) {
+      throw ApplicationErrors.conflict(
+        'Delete later tournament phases before deleting this phase',
+      );
     }
     if (
       phase instanceof GroupPhase &&
@@ -171,5 +226,152 @@ export class PhasesService {
       throw ApplicationErrors.notFound(`Phase with id ${phaseId} not found`);
     }
     return phase;
+  }
+
+  private assertPhaseFields(dto: PhaseDto, phase?: Phase): void {
+    const isFinal = phase
+      ? phase instanceof FinalPhase
+      : dto.type === 'FINAL';
+    if (isFinal && dto.type === 'GROUP') {
+      throw ApplicationErrors.invalidInput(
+        'A phase subtype cannot be changed after creation',
+      );
+    }
+    if (!isFinal && dto.expectedMatchCount !== undefined) {
+      throw ApplicationErrors.invalidInput(
+        'expectedMatchCount is only valid for final phases',
+      );
+    }
+    if (!isFinal && dto.isThirdPlace) {
+      throw ApplicationErrors.invalidInput(
+        'isThirdPlace is only valid for final phases',
+      );
+    }
+    if (isFinal && dto.expectedMatchCount !== undefined) {
+      if (
+        !Number.isInteger(dto.expectedMatchCount) ||
+        dto.expectedMatchCount < 1
+      ) {
+        throw ApplicationErrors.invalidInput(
+          'expectedMatchCount must be a positive integer',
+        );
+      }
+    }
+  }
+
+  private assertConsecutiveOrders(phases: Phase[]): void {
+    const ordered = [...phases].sort((left, right) => left.order - right.order);
+    if (ordered.some((phase, index) => phase.order !== index + 1)) {
+      throw ApplicationErrors.conflict(
+        'Tournament phases must have consecutive orders starting at 1',
+      );
+    }
+  }
+
+  private assertFinalPhaseChain(
+    order: number,
+    expectedMatchCount: number | null,
+    isThirdPlace: boolean,
+    otherPhases: Phase[],
+  ): void {
+    if (expectedMatchCount === null || expectedMatchCount < 1) {
+      throw ApplicationErrors.invalidInput(
+        'expectedMatchCount is required and must be positive for final phases',
+      );
+    }
+    if (!Number.isInteger(Math.log2(expectedMatchCount))) {
+      throw ApplicationErrors.invalidInput(
+        'expectedMatchCount must be a power of two so consecutive rounds can halve to one final match',
+      );
+    }
+    const finalPhases = otherPhases
+      .filter((phase): phase is FinalPhase => phase instanceof FinalPhase)
+      .sort((left, right) => left.order - right.order);
+    const previousPhases = finalPhases.filter(
+      (phase) => phase.order < order,
+    );
+    const previous = previousPhases[previousPhases.length - 1];
+    const next = finalPhases.find((phase) => phase.order > order);
+
+    if (previous) {
+      if (previous.expectedMatchCount == null) {
+        throw ApplicationErrors.conflict(
+          `Set the expected match count for ${previous.name} before adding another final round`,
+        );
+      }
+      if (
+        previous.expectedMatchCount % 2 !== 0 ||
+        expectedMatchCount !== previous.expectedMatchCount / 2
+      ) {
+        throw ApplicationErrors.invalidInput(
+          `This round must contain exactly half the main matches of ${previous.name}`,
+        );
+      }
+    }
+
+    if (
+      next &&
+      (expectedMatchCount % 2 !== 0 ||
+        next.expectedMatchCount !== expectedMatchCount / 2)
+    ) {
+      throw ApplicationErrors.conflict(
+        `The expected match count must preserve the halving rule for ${next.name}`,
+      );
+    }
+
+    if (
+      isThirdPlace &&
+      (expectedMatchCount !== 1 ||
+        previous?.expectedMatchCount !== 2)
+    ) {
+      throw ApplicationErrors.invalidInput(
+        'A third-place match requires a final round with one main match after a round of two matches',
+      );
+    }
+  }
+
+  private assertExistingMatchesFitPhase(
+    phase: FinalPhase,
+    matches: Awaited<ReturnType<PhasesRepository['findMatchesByPhase']>>,
+  ): void {
+    const expectedTotal =
+      (phase.expectedMatchCount ?? 0) + (phase.isThirdPlace ? 1 : 0);
+    if (matches.length > expectedTotal) {
+      throw ApplicationErrors.conflict(
+        'The new round configuration is smaller than the matches already registered',
+      );
+    }
+
+    const seenPositions = new Set<string>();
+    for (const match of matches) {
+      if (!match.bracketPosition) {
+        throw ApplicationErrors.conflict(
+          `Match #${match.matchId} needs a bracket position before changing the round configuration`,
+        );
+      }
+      if (
+        match.isThirdPlace &&
+        (!phase.isThirdPlace || match.bracketPosition !== 1)
+      ) {
+        throw ApplicationErrors.conflict(
+          'The third-place match requires a phase configured for third place and position 1',
+        );
+      }
+      if (
+        !match.isThirdPlace &&
+        match.bracketPosition > (phase.expectedMatchCount ?? 0)
+      ) {
+        throw ApplicationErrors.conflict(
+          `Match #${match.matchId} is outside the configured bracket positions`,
+        );
+      }
+      const positionKey = `${match.isThirdPlace}:${match.bracketPosition}`;
+      if (seenPositions.has(positionKey)) {
+        throw ApplicationErrors.conflict(
+          `Bracket position ${match.bracketPosition} is duplicated in ${phase.name}`,
+        );
+      }
+      seenPositions.add(positionKey);
+    }
   }
 }

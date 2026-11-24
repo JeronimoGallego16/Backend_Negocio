@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { GroupPhase } from '../../phases/entities/group-phase.entity';
 
 /**
@@ -28,7 +29,7 @@ export class CompetitionGroup {
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'phase_id' })
-  phase!: GroupPhase;
+  phase!: Relation<GroupPhase>;
 
   @Column({ name: 'letter_or_number', type: 'varchar', length: 20 })
   letterOrNumber!: string;
@@ -39,5 +40,5 @@ export class CompetitionGroup {
   @OneToMany(() => Team, (team) => team.group, {
     cascade: false,
   })
-  teams?: Team[];
+  teams?: Relation<Team[]>;
 }

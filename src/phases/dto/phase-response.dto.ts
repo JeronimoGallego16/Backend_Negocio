@@ -8,4 +8,5 @@ export class PhaseResponseDto {
   tournamentId!: number;
   type!: 'GROUP' | 'FINAL';
   isThirdPlace?: boolean;
+  expectedMatchCount?: number | null;
 }

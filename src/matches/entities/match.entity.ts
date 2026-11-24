@@ -29,10 +29,10 @@ export class Match {
   annotations!: Relation<Annotation[]>;
 
   @Column({ name: 'home_score', type: 'int', nullable: true })
-  homeScore?: number;
+  homeScore?: number | null;
 
   @Column({ name: 'away_score', type: 'int', nullable: true })
-  awayScore?: number;
+  awayScore?: number | null;
 
   @Column({ name: 'round_name', type: 'varchar', length: 50, nullable: true })
   roundName?: string;
@@ -70,17 +70,17 @@ export class Match {
 
   @ManyToOne(() => Team, (team) => team.homeMatches, {
     cascade: false,
-    nullable: false,
+    nullable: true,
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'home_team_id', referencedColumnName: 'teamId' })
-  homeTeam!: Relation<Team>;
+  homeTeam!: Relation<Team | null>;
 
   @ManyToOne(() => Team, (team) => team.awayMatches, {
     cascade: false,
-    nullable: false,
+    nullable: true,
     onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'away_team_id', referencedColumnName: 'teamId' })
-  awayTeam!: Relation<Team>;
+  awayTeam!: Relation<Team | null>;
 }

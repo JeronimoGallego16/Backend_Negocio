@@ -1,4 +1,5 @@
 import { ChildEntity, OneToMany } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { CompetitionGroup } from '../../groups/entities/competition-group.entity';
 import { Phase } from './phase.entity';
 
@@ -10,5 +11,5 @@ export class GroupPhase extends Phase {
   @OneToMany(() => CompetitionGroup, (group) => group.phase, {
     cascade: false,
   })
-  groups?: CompetitionGroup[];
+  groups?: Relation<CompetitionGroup[]>;
 }

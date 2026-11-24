@@ -44,6 +44,11 @@ export class AnnotationsService {
         'Annotations can only be created while the match is active',
       );
     }
+    if (match.homeTeamId === null || match.awayTeamId === null) {
+      throw ApplicationErrors.conflict(
+        'Annotations can only be created after both match teams are assigned',
+      );
+    }
 
     await this.playersService.findOne(dto.playerId);
     const currentDate = new Date().toISOString().slice(0, 10);
